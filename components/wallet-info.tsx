@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Button } from "@/components/ui/button";
 
 interface WalletInfoProps {
   address: string;
@@ -33,35 +32,77 @@ export default function WalletInfo({ address }: WalletInfoProps) {
   const explorerUrl = `https://explorer.solana.com/address/${address}?cluster=${network}`;
 
   return (
-    <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-3 min-w-[260px]">
+    <div
+      className="flex flex-col gap-4 rounded-2xl p-5"
+      style={{
+        background: "#111111",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
       {/* Balance */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-500 uppercase tracking-wider">Balance</span>
-        <span className="text-sm font-semibold text-white font-mono">
+        <span
+          className="text-[10px] font-bold uppercase tracking-widest"
+          style={{ color: "rgba(255,255,255,0.25)", letterSpacing: "0.14em" }}
+        >
+          Balance
+        </span>
+        <span
+          className="text-sm font-mono font-semibold"
+          style={{
+            color:
+              balance === null
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(255,255,255,0.8)",
+          }}
+        >
           {balance === null ? (
-            <span className="text-zinc-600 animate-pulse">—</span>
+            <span className="animate-pulse">— SOL</span>
           ) : (
-            `${balance.toFixed(3)} SOL`
+            `${balance.toFixed(4)} SOL`
           )}
         </span>
       </div>
 
+      {/* Divider */}
+      <div style={{ height: "1px", background: "rgba(255,255,255,0.05)" }} />
+
       {/* Actions */}
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="outline"
+        <button
           onClick={copyAddress}
-          className="flex-1 border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-xs rounded-lg"
+          className="flex-1 text-xs font-medium py-2 rounded-lg transition-all duration-150 active:scale-[0.97]"
+          style={{
+            background: copied
+              ? "rgba(34,197,94,0.1)"
+              : "rgba(255,255,255,0.04)",
+            border: copied
+              ? "1px solid rgba(34,197,94,0.2)"
+              : "1px solid rgba(255,255,255,0.07)",
+            color: copied ? "#4ade80" : "rgba(255,255,255,0.45)",
+          }}
         >
-          {copied ? "Copied!" : "Copy Address"}
-        </Button>
+          {copied ? "Copied ✓" : "Copy Address"}
+        </button>
 
         <a
           href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center text-xs text-zinc-400 hover:text-violet-400 border border-zinc-700 hover:border-violet-700 rounded-lg px-3 py-1.5 transition-colors"
+          className="flex-1 flex items-center justify-center text-xs font-medium py-2 rounded-lg transition-all duration-150"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            color: "rgba(255,255,255,0.45)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#c084fc";
+            e.currentTarget.style.borderColor = "rgba(153,69,255,0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+          }}
         >
           Explorer ↗
         </a>

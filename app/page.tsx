@@ -1,102 +1,125 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { useWallets } from "@privy-io/react-auth/solana";
-import { Button } from "@/components/ui/button";
-import WalletInfo from "@/components/wallet-info";
+import { Hero } from "@/components/site/hero";
+import { Navbar } from "@/components/site/navbar";
+import { PricingCalculator } from "@/components/site/pricing-calculator";
+import { Banknote, Gauge, Target, LineChart } from "lucide-react";
 
-function truncateAddress(address: string) {
-  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
+      <path d="M18.901 1.153h3.68l-8.04 9.19 9.458 12.504h-7.405l-5.8-7.584-6.633 7.584H.48l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932Zm-1.291 19.492h2.039L6.486 3.24H4.298L17.61 20.645Z" />
+    </svg>
+  );
 }
 
-export default function Home() {
-  const { ready, authenticated, login, logout, user } = usePrivy();
-  const { wallets } = useWallets();
+function GitHubIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
+      <path d="M12 .297a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.577v-2.234c-3.338.726-4.042-1.61-4.042-1.61-.546-1.386-1.333-1.756-1.333-1.756-1.09-.744.083-.729.083-.729 1.204.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.419-1.304.762-1.604-2.665-.304-5.467-1.334-5.467-5.932 0-1.31.468-2.381 1.235-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.323 3.3 1.23a11.49 11.49 0 0 1 6 0c2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.233 1.911 1.233 3.221 0 4.61-2.807 5.625-5.48 5.921.43.372.814 1.103.814 2.222v3.293c0 .319.216.694.825.576A12 12 0 0 0 12 .297Z" />
+    </svg>
+  );
+}
 
-  const solanaWallet = wallets[0];
-  const walletAddress = solanaWallet?.address;
+export default function HomePage() {
+  const { ready, authenticated, login } = usePrivy();
 
-  const userLabel =
-    user?.email?.address ??
-    user?.google?.email ??
-    (walletAddress ? truncateAddress(walletAddress) : null);
+const features = [
+  {
+    icon: Banknote,
+    title: "Depósito via PIX",
+    desc: "Sem cartão internacional. Sem crypto. Deposita em reais e sua campanha está no ar em minutos.",
+  },
+  {
+    icon: Gauge,
+    title: "Bid Optimizer",
+    desc: "O Bido ajusta seus lances automaticamente para maximizar aparições dentro do seu orçamento diário.",
+  },
+  {
+    icon: Target,
+    title: "Targeting por intenção",
+    desc: "Escolha as queries exatas onde quer aparecer. Seu anúncio só roda quando a busca é relevante pro seu negócio.",
+  },
+  {
+    icon: LineChart,
+    title: "Relatório em tempo real",
+    desc: "Veja queries, impressões e decisões geradas — tudo num dashboard simples, sem precisar de analista.",
+  },
+];
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
+          Carregando experiência Bido…
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-[#0A0A0F] flex flex-col items-center justify-center px-4">
-      {/* Background glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar authenticated={authenticated} onLogin={login} />
+      <main>
+        <Hero authenticated={authenticated} onLogin={login} />
 
-      <div className="relative z-10 flex flex-col items-center gap-8 text-center max-w-2xl">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-6xl font-black tracking-tighter text-white">
-            bid<span className="text-violet-500">o</span>
-          </span>
-          <span className="text-xs font-semibold tracking-[0.3em] uppercase text-violet-400/70">
-            Protocol
-          </span>
-        </div>
+        <section id="pricing" className="border-t border-border/60">
+          <PricingCalculator />
+        </section>
 
-        {/* Tagline */}
-        <p className="text-xl text-zinc-400 font-light leading-relaxed max-w-md">
-          Real-time intent auctions for the{" "}
-          <span className="text-white font-medium">agent economy</span>
-        </p>
+        <section className="border-t border-border/60 py-32">
+          <div className="mx-auto max-w-6xl px-6">
+            <h2 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
+              Feito para marcas que querem estar onde a decisão acontece.
+            </h2>
+            <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+              O Bido traz estrutura para anunciar na era dos agentes de IA.
+            </p>
 
-        {/* Auth area */}
-        {!ready ? (
-          <div className="h-10 w-40 rounded-lg bg-zinc-800 animate-pulse" />
-        ) : authenticated && user ? (
-          <div className="flex flex-col items-center gap-4">
-            {/* User info card */}
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-6 py-4 flex flex-col items-center gap-2 min-w-[260px]">
-              <div className="w-10 h-10 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400 font-bold text-sm">
-                {userLabel ? userLabel[0].toUpperCase() : "?"}
-              </div>
-              {userLabel && (
-                <span className="text-zinc-300 text-sm font-medium">{userLabel}</span>
-              )}
-              {walletAddress && (
-                <span className="text-zinc-500 text-xs font-mono">
-                  {truncateAddress(walletAddress)}
-                </span>
-              )}
+            <div className="mt-16 grid gap-6 sm:grid-cols-2">
+              {features.map((f) => (
+                <div
+                  key={f.title}
+                  className="rounded-2xl border border-border bg-surface-2 p-6"
+                >
+                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-soft text-violet">
+                    <f.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-xl font-bold">{f.title}</h3>
+                  <p className="mt-2 text-muted-foreground">{f.desc}</p>
+                </div>
+              ))}
             </div>
-
-            {walletAddress && <WalletInfo address={walletAddress} />}
-
-            <Button
-              variant="outline"
-              onClick={logout}
-              className="border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 rounded-xl"
-            >
-              Disconnect
-            </Button>
           </div>
-        ) : (
-          <Button
-            onClick={login}
-            className="bg-violet-600 hover:bg-violet-500 text-white font-semibold px-8 py-3 rounded-xl text-base transition-all duration-200 shadow-lg shadow-violet-900/30 hover:shadow-violet-700/40"
-          >
-            Connect Wallet
-          </Button>
-        )}
+        </section>
 
-        {/* Footer badges */}
-        <div className="flex items-center gap-3 mt-4">
-          <span className="text-xs text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1">
-            Solana
-          </span>
-          <span className="text-xs text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1">
-            Devnet
-          </span>
-          <span className="text-xs text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full px-3 py-1">
-            v0.1.0
-          </span>
-        </div>
-      </div>
-    </main>
+        <footer className="border-t border-border/60 py-12">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 text-sm text-muted-foreground">
+            <span>© {new Date().getFullYear()} Bido</span>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://x.com/usebido"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="X"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-surface-2 transition-colors hover:text-foreground"
+              >
+                <XIcon />
+              </a>
+              <a
+                href="https://github.com/bido-solana"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-surface-2 transition-colors hover:text-foreground"
+              >
+                <GitHubIcon />
+              </a>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
   );
 }
