@@ -6,6 +6,7 @@ import { Navbar } from "@/components/site/navbar";
 import { PricingCalculator } from "@/components/site/pricing-calculator";
 import { TerminalDemo } from "@/components/site/terminal-demo";
 import { FaqsSection } from "@/components/ui/faqs-1";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { Banknote, Gauge, Target, LineChart } from "lucide-react";
 
 function XIcon() {
@@ -26,35 +27,20 @@ function GitHubIcon() {
 
 export default function HomePage() {
   const { ready, authenticated, login } = usePrivy();
+  const { messages, replace } = useI18n();
 
-const features = [
-  {
-    icon: Banknote,
-    title: "Depósito via PIX",
-    desc: "Sem cartão internacional. Sem crypto. Deposita em reais e sua campanha está no ar em minutos.",
-  },
-  {
-    icon: Gauge,
-    title: "Bid Optimizer",
-    desc: "O Bido ajusta seus lances automaticamente para maximizar aparições dentro do seu orçamento diário.",
-  },
-  {
-    icon: Target,
-    title: "Targeting por intenção",
-    desc: "Escolha as queries exatas onde quer aparecer. Seu anúncio só roda quando a busca é relevante pro seu negócio.",
-  },
-  {
-    icon: LineChart,
-    title: "Relatório em tempo real",
-    desc: "Veja queries, impressões e decisões geradas — tudo num dashboard simples, sem precisar de analista.",
-  },
-];
+  const features = [
+    { icon: Banknote, ...messages.home.features[0] },
+    { icon: Gauge, ...messages.home.features[1] },
+    { icon: Target, ...messages.home.features[2] },
+    { icon: LineChart, ...messages.home.features[3] },
+  ];
 
   if (!ready) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          Carregando experiência Bido…
+          {messages.common.loadingExperience}
         </div>
       </main>
     );
@@ -69,10 +55,10 @@ const features = [
         <section className="border-t border-border/60 py-32">
           <div className="mx-auto max-w-6xl px-6">
             <h2 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-              Feito para marcas que querem estar onde a decisão acontece.
+              {messages.home.featuresTitle}
             </h2>
             <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-              O Bido traz estrutura para anunciar na era dos agentes de IA.
+              {messages.home.featuresDescription}
             </p>
 
             <div className="mt-16 grid gap-6 sm:grid-cols-2">
@@ -103,7 +89,7 @@ const features = [
         
         <footer className="border-t border-border/60 py-12">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 text-sm text-muted-foreground">
-            <span>© {new Date().getFullYear()} Bido</span>
+            <span>{replace(messages.home.footerCopy, { year: new Date().getFullYear() })}</span>
             <div className="flex items-center gap-3">
               <a
                 href="https://x.com/usebido"

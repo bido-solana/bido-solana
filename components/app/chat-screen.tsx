@@ -13,6 +13,7 @@ import {
   loadThreads,
   type ChatThread,
 } from "@/lib/chat-store";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { BidoChatSidebar } from "@/components/app/bido-chat-sidebar";
 import { BidoMessageInput } from "@/components/app/bido-message-input";
 
@@ -25,6 +26,7 @@ function ChatHeader({
   onDesktopToggle: () => void;
   onMobileToggle: () => void;
 }) {
+  const { messages } = useI18n();
   return (
     <header className="absolute inset-x-0 top-0 z-30 border-b border-white/6">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
@@ -44,7 +46,7 @@ function ChatHeader({
                 ? "border-violet/30 bg-surface-2 ring-1 ring-violet/30"
                 : "border-border bg-surface hover:bg-surface-2"
             }`}
-            aria-label="Abrir drawer de chats"
+            aria-label={messages.common.openChatsDrawer}
           >
             <Menu className="size-4 text-muted-foreground" />
             <span className="text-lg font-extrabold tracking-tight">BIDO</span>
@@ -63,7 +65,8 @@ function ChatHeader({
 
 export function ChatScreen() {
   const router = useRouter();
-  const [threads, setThreads] = useState<ChatThread[]>(() => loadThreads());
+  const { locale, messages } = useI18n();
+  const [threads, setThreads] = useState<ChatThread[]>(() => loadThreads(locale));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -73,8 +76,8 @@ export function ChatScreen() {
   }, [threads]);
 
   const createChat = () => {
-    const thread = createEmptyThread();
-    const next = addThread(thread);
+    const thread = createEmptyThread(locale);
+    const next = addThread(locale, thread);
     setThreads(next);
     router.push(`/chat/${thread.id}`);
     setSidebarOpen(false);
@@ -82,8 +85,8 @@ export function ChatScreen() {
   };
 
   const sendMessage = (message: string) => {
-    const thread = createEmptyThread(message);
-    const next = addThread(thread);
+    const thread = createEmptyThread(locale, message);
+    const next = addThread(locale, thread);
     setThreads(next);
     router.push(`/chat/${thread.id}`);
   };
@@ -124,10 +127,10 @@ export function ChatScreen() {
                   <MessageSquare className="size-6" />
                 </div>
                 <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
-                  Novo chat Bido
+                  {messages.app.newChatTitle}
                 </h1>
                 <p className="mt-3 max-w-xl text-muted-foreground">
-                  Crie uma conversa nova ou envie uma mensagem para começar a estruturar uma campanha.
+                  {messages.app.newChatDescription}
                 </p>
               </div>
               <div ref={messagesEndRef} />

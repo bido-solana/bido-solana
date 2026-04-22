@@ -6,6 +6,7 @@ import { UserPill } from "@privy-io/react-auth/ui";
 import {
   Menu,
 } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { addThread, createEmptyThread, loadThreads, type ChatThread } from "@/lib/chat-store";
 import { BidoChatSidebar } from "@/components/app/bido-chat-sidebar";
 import { BidoMessageInput } from "@/components/app/bido-message-input";
@@ -44,6 +45,7 @@ function AppNavbar({
   onLogoClick: () => void;
   onMobileToggle: () => void;
 }) {
+  const { messages } = useI18n();
   return (
     <header className="absolute inset-x-0 top-0 z-30 border-b border-white/6">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
@@ -68,7 +70,7 @@ function AppNavbar({
                   ? "border-violet/30 bg-surface-2 ring-1 ring-violet/30"
                   : "border-border bg-surface hover:bg-surface-2"
               }`}
-              aria-label="Abrir drawer de chats"
+              aria-label={messages.common.openChatsDrawer}
             >
               <Menu className="size-4 text-muted-foreground" />
               <span className="text-lg font-extrabold tracking-tight">BIDO</span>
@@ -138,9 +140,10 @@ function RayBackground() {
 }
 
 function ImportButtons() {
+  const { messages } = useI18n();
   return (
     <div className="flex items-center justify-center gap-4">
-      <span className="text-sm text-muted-foreground">ou importe de</span>
+      <span className="text-sm text-muted-foreground">{messages.app.importFrom}</span>
       <div className="flex gap-2">
         {[
           { id: "google", name: "Google Ads", icon: <GoogleIcon className="size-4" /> },
@@ -161,10 +164,11 @@ function ImportButtons() {
 
 export function LoggedInScreen() {
   const router = useRouter();
+  const { locale, messages } = useI18n();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [threads, setThreads] = useState<ChatThread[]>(() =>
-    loadThreads().sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)),
+    loadThreads(locale).sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt)),
   );
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -203,8 +207,8 @@ export function LoggedInScreen() {
   }, []);
 
   const handleCreateChat = (message?: string) => {
-    const thread = createEmptyThread(message);
-    const next = addThread(thread).sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
+    const thread = createEmptyThread(locale, message);
+    const next = addThread(locale, thread).sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
     setThreads(next);
     setSidebarOpen(false);
     setMobileSidebarOpen(false);
@@ -242,20 +246,20 @@ export function LoggedInScreen() {
       >
         <div className="mb-6 text-center">
           <h1 className="mb-1 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            O que vamos{" "}
+            {messages.app.headingBefore}{" "}
             <span className="bg-gradient-to-b from-violet via-violet to-white bg-clip-text italic text-transparent">
-              patrocinar
+              {messages.app.headingAccent}
             </span>{" "}
-            hoje?
+            {messages.app.headingAfter}
           </h1>
           <p className="text-base font-semibold text-muted-foreground sm:text-lg">
-            Crie campanhas, fluxos e experiências do Bido dentro do aplicativo.
+            {messages.app.description}
           </p>
         </div>
 
         <div className="mt-2 mb-6 w-full max-w-[700px] sm:mb-8">
           <BidoMessageInput
-            placeholder="Descreva o que você quer criar no aplicativo..."
+            placeholder={messages.app.inputPlaceholder}
             onSend={(message) => handleCreateChat(message)}
           />
         </div>

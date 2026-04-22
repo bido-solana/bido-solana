@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface CommandInputProps {
   command: string;
@@ -9,6 +10,7 @@ interface CommandInputProps {
 
 export function CommandInput({ command }: CommandInputProps) {
   const [copied, setCopied] = useState(false);
+  const { locale } = useI18n();
 
   const handleCopy = async () => {
     try {
@@ -41,17 +43,17 @@ export function CommandInput({ command }: CommandInputProps) {
         type="button"
         onClick={handleCopy}
         className="relative z-10 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
-        aria-label="Copy command"
+        aria-label={locale === "pt-BR" ? "Copiar comando" : "Copy command"}
       >
         {copied ? (
           <>
             <Check className="size-3.5" />
-            Copied
+            {locale === "pt-BR" ? "Copiado" : "Copied"}
           </>
         ) : (
           <>
             <Copy className="size-3.5" />
-            Copy
+            {locale === "pt-BR" ? "Copiar" : "Copy"}
           </>
         )}
       </button>

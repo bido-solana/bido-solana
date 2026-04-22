@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { UserPill } from "@privy-io/react-auth/ui";
 import { BarChart3, Menu } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { appendMessage, loadThreads, type ChatThread } from "@/lib/chat-store";
 import { BidoChatSidebar } from "@/components/app/bido-chat-sidebar";
 import { AnalyticsArtifactPanel } from "@/components/app/analytics-artifact-panel";
@@ -15,7 +16,8 @@ export default function ChatDetailPage() {
   const router = useRouter();
   const chatId = params?.chatId as string;
   const { authenticated, ready } = usePrivy();
-  const [threads, setThreads] = useState<ChatThread[]>(() => loadThreads());
+  const { locale, messages } = useI18n();
+  const [threads, setThreads] = useState<ChatThread[]>(() => loadThreads(locale));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -49,7 +51,7 @@ export default function ChatDetailPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          Carregando chat…
+          {messages.common.loadingChat}
         </div>
       </main>
     );
@@ -59,14 +61,14 @@ export default function ChatDetailPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          Redirecionando para a home…
+          {messages.common.redirectingHome}
         </div>
       </main>
     );
   }
 
   const sendMessage = (message: string) => {
-    const next = appendMessage(chatId, message);
+    const next = appendMessage(locale, chatId, message);
     setThreads(next);
   };
 
@@ -119,7 +121,7 @@ export default function ChatDetailPage() {
                     ? "border-violet/30 bg-surface-2 ring-1 ring-violet/30"
                     : "border-border bg-surface hover:bg-surface-2"
                 }`}
-                aria-label="Abrir drawer de chats"
+                aria-label={messages.common.openChatsDrawer}
               >
                 <Menu className="size-4 text-muted-foreground" />
                 <span className="text-lg font-extrabold tracking-tight">BIDO</span>
@@ -129,7 +131,7 @@ export default function ChatDetailPage() {
 
           <div className="flex items-center gap-2">
             <div className="hidden max-w-[260px] items-center rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground/82 lg:flex">
-              <span className="truncate">{thread?.title || "Campanha atual"}</span>
+              <span className="truncate">{thread?.title || messages.common.currentCampaign}</span>
             </div>
             <button
               type="button"
@@ -140,7 +142,7 @@ export default function ChatDetailPage() {
                 }`}
             >
               <BarChart3 className="size-4" />
-              Ver Analytics
+              {messages.app.viewAnalytics}
             </button>
             <div className="rounded-full border border-border bg-surface px-1 py-1 backdrop-blur-xl">
               <UserPill />
@@ -152,7 +154,7 @@ export default function ChatDetailPage() {
       {mobileSidebarOpen ? (
         <button
           type="button"
-          aria-label="Fechar sidebar"
+          aria-label={messages.common.closeSidebar}
           onClick={() => setMobileSidebarOpen(false)}
           className="absolute inset-0 z-10 bg-black/30 backdrop-blur-[1px] md:hidden"
         />
@@ -209,7 +211,7 @@ export default function ChatDetailPage() {
                   </div>
                 ))
               ) : (
-                <div className="pt-16 text-center text-muted-foreground">Chat não encontrado.</div>
+                <div className="pt-16 text-center text-muted-foreground">{messages.common.chatNotFound}</div>
               )}
               <div ref={messagesEndRef} />
             </div>

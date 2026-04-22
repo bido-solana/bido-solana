@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, SendHorizontal, Zap } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface Model {
   id: string;
@@ -11,16 +12,6 @@ interface Model {
   badge?: string;
 }
 
-const models: Model[] = [
-  {
-    id: "bido-0.1",
-    name: "Bido 0.1",
-    description: "O primeiro modelo da Bido",
-    icon: <Zap className="size-4 text-violet" />,
-    badge: "Default",
-  },
-];
-
 function ModelSelector({
   selectedModel = "bido-0.1",
   onModelChange,
@@ -28,6 +19,16 @@ function ModelSelector({
   selectedModel?: string;
   onModelChange?: (model: Model) => void;
 }) {
+  const { messages } = useI18n();
+  const models: Model[] = [
+    {
+      id: "bido-0.1",
+      name: "Bido 0.1",
+      description: messages.app.messageInput.modelDescription,
+      icon: <Zap className="size-4 text-violet" />,
+      badge: messages.app.messageInput.modelBadge,
+    },
+  ];
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(
     models.find((model) => model.id === selectedModel) ?? models[0],
@@ -59,7 +60,7 @@ function ModelSelector({
           <div className="absolute bottom-full left-0 z-50 mb-2 min-w-[220px] overflow-hidden rounded-xl border border-border bg-surface-2/95 shadow-2xl shadow-black/50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="p-1.5">
               <div className="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Select Model
+                {messages.common.selectModel}
               </div>
               {models.map((model) => (
                 <button
@@ -99,11 +100,12 @@ function ModelSelector({
 
 export function BidoMessageInput({
   onSend,
-  placeholder = "Escreva sua mensagem...",
+  placeholder,
 }: {
   onSend: (message: string) => void;
   placeholder?: string;
 }) {
+  const { messages } = useI18n();
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -134,7 +136,7 @@ export function BidoMessageInput({
               handleSubmit();
             }
           }}
-          placeholder={placeholder}
+          placeholder={placeholder ?? messages.app.messageInput.placeholder}
           className="min-h-[80px] max-h-[200px] w-full resize-none bg-transparent px-5 pt-5 pb-3 text-[15px] text-foreground placeholder:text-muted-foreground focus:outline-none"
           style={{ height: "80px" }}
         />
@@ -147,7 +149,7 @@ export function BidoMessageInput({
             disabled={!message.trim()}
             className="flex items-center gap-2 rounded-full bg-violet px-4 py-2 text-sm font-medium text-violet-foreground shadow-[0_0_20px_rgba(179,112,255,0.24)] transition-all duration-200 hover:bg-violet/90 disabled:cursor-not-allowed disabled:opacity-40 active:scale-95"
           >
-            <span className="hidden sm:inline">Enviar</span>
+            <span className="hidden sm:inline">{messages.app.messageInput.send}</span>
             <SendHorizontal className="size-4" />
           </button>
         </div>

@@ -2,19 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X, ArrowRight, CheckCircle2, Loader2, ChevronDown } from "lucide-react";
-
-const SEGMENTOS = [
-  { value: "ecommerce", label: "E-commerce" },
-  { value: "delivery", label: "Delivery" },
-  { value: "servicos", label: "Serviços" },
-  { value: "outro", label: "Outro" },
-];
-
-const ORCAMENTOS = [
-  { value: "500-2k", label: "R$ 500 – R$ 2.000 / mês" },
-  { value: "2k-10k", label: "R$ 2.000 – R$ 10.000 / mês" },
-  { value: "10k+", label: "R$ 10.000+ / mês" },
-];
+import { useI18n } from "@/components/providers/i18n-provider";
 
 type FormState = {
   nome: string;
@@ -41,9 +29,21 @@ export function WaitlistModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const { messages } = useI18n();
   const [form, setForm] = useState<FormState>(EMPTY);
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const firstRef = useRef<HTMLInputElement>(null);
+  const SEGMENTOS = [
+    { value: "ecommerce", label: messages.waitlist.segments.ecommerce },
+    { value: "delivery", label: messages.waitlist.segments.delivery },
+    { value: "servicos", label: messages.waitlist.segments.services },
+    { value: "outro", label: messages.waitlist.segments.other },
+  ];
+  const ORCAMENTOS = [
+    { value: "500-2k", label: messages.waitlist.budgetRanges.range1 },
+    { value: "2k-10k", label: messages.waitlist.budgetRanges.range2 },
+    { value: "10k+", label: messages.waitlist.budgetRanges.range3 },
+  ];
 
   const handleClose = useCallback(() => {
     setStatus("idle");
@@ -78,10 +78,37 @@ export function WaitlistModal({
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
-    setTimeout(() => setStatus("success"), 1500);
+
+    try {
+      const formData = new FormData();
+      formData.append("nome", form.nome);
+      formData.append("email", form.email);
+      formData.append("empresa", form.empresa);
+      formData.append(
+        "segmento",
+        form.segmento === "outro" ? form.segmentoOutro : form.segmento,
+      );
+      formData.append("orcamento", form.orcamento);
+      formData.append("_subject", "Nova entrada na lista de espera - Bido");
+      formData.append("_captcha", "false");
+      formData.append("_template", "table");
+
+      const response = await fetch("https://formsubmit.co/bellujrb@gmail.com", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Form submit failed");
+      }
+
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
@@ -95,21 +122,21 @@ export function WaitlistModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Lista de espera"
+        aria-label={messages.waitlist.dialogLabel}
         className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
         <div className="animate-in fade-in zoom-in-95 duration-300 relative w-full max-w-lg rounded-2xl border border-border bg-surface-2 shadow-2xl shadow-black/70">
           <div className="flex items-start justify-between border-b border-border px-6 py-5">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Entrar na lista de espera</h2>
+              <h2 className="text-xl font-bold text-foreground">{messages.waitlist.title}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Vamos entrar em contato assim que sua vaga abrir.
+                {messages.waitlist.description}
               </p>
             </div>
 
             <button
               onClick={handleClose}
-              aria-label="Fechar modal"
+              aria-label={messages.waitlist.closeModal}
               className="ml-4 mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground transition hover:bg-surface-2 hover:text-foreground"
             >
               <X className="h-4 w-4" />
@@ -122,25 +149,25 @@ export function WaitlistModal({
                 <CheckCircle2 className="h-7 w-7 text-violet" />
               </div>
               <div>
-                <p className="text-lg font-bold text-foreground">Você está na lista!</p>
+                <p className="text-lg font-bold text-foreground">{messages.waitlist.successTitle}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Avisaremos em breve. Fique de olho no e-mail.
+                  {messages.waitlist.successDescription}
                 </p>
               </div>
               <button
                 onClick={handleClose}
                 className="mt-2 text-sm font-semibold text-violet transition hover:underline"
               >
-                Fechar
+                {messages.common.close}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 px-6 py-6">
-              <Field label="Nome">
+              <Field label={messages.waitlist.name}>
                 <Input
                   id="wl-nome"
                   ref={firstRef}
-                  placeholder="Seu nome completo"
+                  placeholder={messages.waitlist.form.namePlaceholder}
                   value={form.nome}
                   onChange={set("nome")}
                   required
@@ -148,11 +175,11 @@ export function WaitlistModal({
                 />
               </Field>
 
-              <Field label="E-mail">
+              <Field label={messages.waitlist.email}>
                 <Input
                   id="wl-email"
                   type="email"
-                  placeholder="voce@empresa.com"
+                  placeholder={messages.waitlist.form.emailPlaceholder}
                   value={form.email}
                   onChange={set("email")}
                   required
@@ -160,10 +187,10 @@ export function WaitlistModal({
                 />
               </Field>
 
-              <Field label="Empresa">
+              <Field label={messages.waitlist.company}>
                 <Input
                   id="wl-empresa"
-                  placeholder="Nome da empresa"
+                  placeholder={messages.waitlist.form.companyPlaceholder}
                   value={form.empresa}
                   onChange={set("empresa")}
                   required
@@ -171,7 +198,7 @@ export function WaitlistModal({
                 />
               </Field>
 
-              <Field label="Segmento">
+              <Field label={messages.waitlist.segment}>
                 <SelectField
                   id="wl-segmento"
                   value={form.segmento}
@@ -179,7 +206,7 @@ export function WaitlistModal({
                   required
                 >
                   <option value="" disabled>
-                    Selecione o segmento…
+                    {messages.waitlist.segmentPlaceholder}
                   </option>
                   {SEGMENTOS.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -192,7 +219,7 @@ export function WaitlistModal({
                   <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
                     <Input
                       id="wl-segmento-outro"
-                      placeholder="Qual segmento?"
+                      placeholder={messages.waitlist.segmentOtherPlaceholder}
                       value={form.segmentoOutro}
                       onChange={set("segmentoOutro")}
                       required
@@ -201,7 +228,7 @@ export function WaitlistModal({
                 ) : null}
               </Field>
 
-              <Field label="Orçamento mensal em ads">
+              <Field label={messages.waitlist.budget}>
                 <SelectField
                   id="wl-orcamento"
                   value={form.orcamento}
@@ -209,7 +236,7 @@ export function WaitlistModal({
                   required
                 >
                   <option value="" disabled>
-                    Selecione a faixa…
+                    {messages.waitlist.budgetPlaceholder}
                   </option>
                   {ORCAMENTOS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -233,17 +260,23 @@ export function WaitlistModal({
                     {status === "loading" ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Enviando…
+                        {messages.waitlist.sending}
                       </>
                     ) : (
                       <>
-                        Garantir minha vaga
+                        {messages.waitlist.submit}
                         <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </span>
                 </button>
               </div>
+
+              {status === "error" ? (
+                <p className="text-sm font-medium text-red-400">
+                  {messages.waitlist.error}
+                </p>
+              ) : null}
             </form>
           )}
         </div>

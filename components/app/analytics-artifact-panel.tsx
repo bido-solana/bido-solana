@@ -2,39 +2,43 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BarChart3, ChevronRight, Gavel, GripVertical, Receipt, Target, TrendingUp, X } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type { ChatThread } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function getAnalytics(thread: ChatThread | null) {
+function getAnalytics(
+  thread: ChatThread | null,
+  formatCurrency: (value: number, options?: Intl.NumberFormatOptions) => string,
+  copy: {
+    fallbackOffer: string;
+    updatedNow: string;
+    metrics: {
+      decisions: string;
+      budgetUsed: string;
+      wonAuctions: string;
+      weeklyPerformance: string;
+      activeOffer: string;
+    };
+    insights: string[];
+  },
+) {
   const decisionCount = Math.max(12, (thread?.messages.length ?? 2) * 9);
   const budgetUsed = 8400 + decisionCount * 185;
   const wonAuctions = Math.max(4, Math.round(decisionCount * 0.34));
   const weeklyPerformance = `+${Math.max(8, Math.round(decisionCount * 0.18))}%`;
-  const activeOffer = thread?.title && thread.title !== "Novo chat" ? thread.title : "Oferta Solana Core";
+  const activeOffer = thread?.title && thread.title.length > 0 ? thread.title : copy.fallbackOffer;
 
   return {
     title: activeOffer,
-    updatedAt: "Atualizado agora",
+    updatedAt: copy.updatedNow,
     metrics: [
-      { label: "Decisões", value: decisionCount.toString(), icon: Target },
-      { label: "Budget usado", value: formatCurrency(budgetUsed), icon: Receipt },
-      { label: "Leilões vencidos", value: wonAuctions.toString(), icon: Gavel },
-      { label: "Performance da semana", value: weeklyPerformance, icon: TrendingUp },
-      { label: "Oferta ativa", value: activeOffer, icon: BarChart3 },
+      { label: copy.metrics.decisions, value: decisionCount.toString(), icon: Target },
+      { label: copy.metrics.budgetUsed, value: formatCurrency(budgetUsed, { maximumFractionDigits: 0 }), icon: Receipt },
+      { label: copy.metrics.wonAuctions, value: wonAuctions.toString(), icon: Gavel },
+      { label: copy.metrics.weeklyPerformance, value: weeklyPerformance, icon: TrendingUp },
+      { label: copy.metrics.activeOffer, value: activeOffer, icon: BarChart3 },
     ],
-    insights: [
-      "Subir intensidade de oferta nos grupos com maior intenção.",
-      "Rebalancear budget das janelas com melhor taxa de resposta.",
-      "Manter a oferta ativa concentrada nos leilões mais eficientes.",
-    ],
+    insights: copy.insights,
   };
 }
 
@@ -51,7 +55,13 @@ export function AnalyticsArtifactPanel({
   onWidthChange: (next: number) => void;
   onClose: () => void;
 }) {
-  const analytics = getAnalytics(thread);
+  const { messages, formatCurrency } = useI18n();
+  const analytics = getAnalytics(thread, formatCurrency, {
+    fallbackOffer: messages.app.currentOfferFallback,
+    updatedNow: messages.app.updatedNow,
+    metrics: messages.app.metrics,
+    insights: [...messages.app.insights],
+  });
   const panelRef = useRef<HTMLElement>(null);
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartX = useRef(0);
@@ -111,7 +121,7 @@ export function AnalyticsArtifactPanel({
       {open ? (
         <button
           type="button"
-          aria-label="Fechar analytics"
+          aria-label={messages.common.close}
           onClick={onClose}
           className="absolute inset-0 z-20 bg-black/30 backdrop-blur-[1px] lg:hidden"
         />
@@ -143,7 +153,7 @@ export function AnalyticsArtifactPanel({
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-white/6 px-5 py-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet">Analytics</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet">{messages.common.analytics}</p>
                 <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
                   {analytics.title}
                 </h2>
@@ -190,8 +200,8 @@ export function AnalyticsArtifactPanel({
                 </div>
 
                 <div className="mt-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                    Recomendações
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    {messages.app.recommendations}
                   </p>
                   <div className="mt-3 space-y-2">
                     {analytics.insights.map((item) => (

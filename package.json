@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@calcom/embed-react": "^1.5.3",
     "@privy-io/react-auth": "^3.22.1",
     "@radix-ui/react-accordion": "^1.2.12",
     "@solana-program/memo": "^0.11.0",

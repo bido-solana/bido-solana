@@ -1,5 +1,7 @@
 "use client";
 
+import { messages, type Locale } from "@/lib/i18n";
+
 export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -14,40 +16,69 @@ export type ChatThread = {
   messages: ChatMessage[];
 };
 
-const STORAGE_KEY = "bido-chat-threads";
+function getStorageKey(locale: Locale) {
+  return `bido-chat-threads:${locale}`;
+}
 
-const fallbackThreads: ChatThread[] = [
-  {
-    id: "chat-1",
-    title: "Campanha Solana",
-    updatedAt: new Date().toISOString(),
-    messages: [
+function getFallbackThreads(locale: Locale): ChatThread[] {
+  if (locale === "en") {
+    return [
       {
-        id: "m-1",
-        role: "user",
-        content: "Quero patrocinar buscas de carteiras Solana com maior intenção.",
-        createdAt: new Date().toISOString(),
+        id: "chat-1",
+        title: "Solana campaign",
+        updatedAt: new Date().toISOString(),
+        messages: [
+          {
+            id: "m-1",
+            role: "user",
+            content: "I want to sponsor searches for Solana wallets with stronger intent.",
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: "m-2",
+            role: "assistant",
+            content: "I can structure intent clusters, daily budget, and CPD for that campaign.",
+            createdAt: new Date().toISOString(),
+          },
+        ],
       },
-      {
-        id: "m-2",
-        role: "assistant",
-        content: "Posso estruturar clusters por intenção, budget diário e CPD para essa campanha.",
-        createdAt: new Date().toISOString(),
-      },
-    ],
-  },
-];
+    ];
+  }
+
+  return [
+    {
+      id: "chat-1",
+      title: "Campanha Solana",
+      updatedAt: new Date().toISOString(),
+      messages: [
+        {
+          id: "m-1",
+          role: "user",
+          content: "Quero patrocinar buscas de carteiras Solana com maior intenção.",
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "m-2",
+          role: "assistant",
+          content: "Posso estruturar clusters por intenção, budget diário e CPD para essa campanha.",
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    },
+  ];
+}
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
-export function loadThreads(): ChatThread[] {
+export function loadThreads(locale: Locale): ChatThread[] {
+  const fallbackThreads = getFallbackThreads(locale);
   if (!canUseStorage()) return fallbackThreads;
 
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = window.localStorage.getItem(getStorageKey(locale));
   if (!raw) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallbackThreads));
+    window.localStorage.setItem(getStorageKey(locale), JSON.stringify(fallbackThreads));
     return fallbackThreads;
   }
 
@@ -59,16 +90,22 @@ export function loadThreads(): ChatThread[] {
   }
 }
 
-export function saveThreads(threads: ChatThread[]) {
+export function saveThreads(locale: Locale, threads: ChatThread[]) {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+  window.localStorage.setItem(getStorageKey(locale), JSON.stringify(threads));
 }
 
-export function createEmptyThread(initialMessage?: string): ChatThread {
+export function createEmptyThread(locale: Locale, initialMessage?: string): ChatThread {
   const timestamp = new Date().toISOString();
+  const fallbackTitle = messages[locale].app.fallbackNewCampaign;
+  const assistantTemplate =
+    locale === "en"
+      ? `Campaign prepared from: "${initialMessage}". I can turn this into targeting, budget, and CPD in the next step.`
+      : `Campanha preparada a partir de: "${initialMessage}". Posso transformar isso em targeting, budget e CPD no próximo passo.`;
+
   return {
     id: `chat-${Date.now()}`,
-    title: initialMessage ? initialMessage.slice(0, 40) : "Novo chat",
+    title: initialMessage ? initialMessage.slice(0, 40) : fallbackTitle,
     updatedAt: timestamp,
     messages: initialMessage
       ? [
@@ -81,7 +118,7 @@ export function createEmptyThread(initialMessage?: string): ChatThread {
           {
             id: `assistant-${Date.now() + 1}`,
             role: "assistant",
-            content: `Campanha preparada a partir de: "${initialMessage}". Posso transformar isso em targeting, budget e CPD no próximo passo.`,
+            content: assistantTemplate,
             createdAt: new Date(Date.now() + 1).toISOString(),
           },
         ]
@@ -89,16 +126,20 @@ export function createEmptyThread(initialMessage?: string): ChatThread {
   };
 }
 
-export function addThread(thread: ChatThread) {
-  const threads = loadThreads();
+export function addThread(locale: Locale, thread: ChatThread) {
+  const threads = loadThreads(locale);
   const next = [thread, ...threads.filter((item) => item.id !== thread.id)];
-  saveThreads(next);
+  saveThreads(locale, next);
   return next;
 }
 
-export function appendMessage(threadId: string, message: string) {
-  const threads = loadThreads();
+export function appendMessage(locale: Locale, threadId: string, message: string) {
+  const threads = loadThreads(locale);
   const now = new Date().toISOString();
+  const assistantContent =
+    locale === "en"
+      ? `Campaign prepared from: "${message}". I can turn this into targeting, budget, and CPD in the next step.`
+      : `Campanha preparada a partir de: "${message}". Posso transformar isso em targeting, budget e CPD no próximo passo.`;
   const userMessage: ChatMessage = {
     id: `user-${Date.now()}`,
     role: "user",
@@ -108,7 +149,7 @@ export function appendMessage(threadId: string, message: string) {
   const assistantMessage: ChatMessage = {
     id: `assistant-${Date.now() + 1}`,
     role: "assistant",
-    content: `Campanha preparada a partir de: "${message}". Posso transformar isso em targeting, budget e CPD no próximo passo.`,
+    content: assistantContent,
     createdAt: new Date(Date.now() + 1).toISOString(),
   };
 
@@ -123,6 +164,6 @@ export function appendMessage(threadId: string, message: string) {
       : thread,
   );
 
-  saveThreads(next);
+  saveThreads(locale, next);
   return next;
 }

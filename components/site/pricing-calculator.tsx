@@ -2,25 +2,14 @@
 
 import { useState } from "react";
 import { Bot, Brain, MousePointerClick, Search } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 const GOOGLE_CPC = 3.5;
 const BIDO_CPD = 0.5;
 
-function formatBRL(value: number) {
-  return value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatVolume(value: number) {
-  return Math.floor(value).toLocaleString("pt-BR");
-}
-
 export function PricingCalculator() {
   const [budget, setBudget] = useState(1000);
+  const { messages, formatCurrency, formatNumber } = useI18n();
 
   const googleVolume = budget / GOOGLE_CPC;
   const bidoVolume = budget / BIDO_CPD;
@@ -38,14 +27,16 @@ export function PricingCalculator() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-10 text-left">
           <h2 className="text-balance text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl md:text-[44px]">
-            Compare seu custo no <span className="text-muted-foreground">Google Ads</span> vs{" "}
-            <span className="text-violet">Bido.</span>
+            {messages.pricing.titleBefore}
+            <span className="text-muted-foreground">{messages.pricing.googleAds}</span>
+            {messages.pricing.titleAfter}
+            <span className="text-violet">{messages.pricing.bido}</span>
           </h2>
         </div>
 
         <div className="mb-6 rounded-xl border border-border bg-surface-2 px-6 py-5">
           <label htmlFor="calc-budget" className="mb-3 block text-sm font-semibold text-muted-foreground">
-            Orçamento mensal
+            {messages.pricing.monthlyBudget}
           </label>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <div className="relative flex-1">
@@ -70,11 +61,11 @@ export function PricingCalculator() {
               step={100}
               value={budget}
               onChange={(event) => setBudget(Number(event.target.value))}
-              aria-label="Ajustar orçamento"
+              aria-label={messages.pricing.budgetAria}
               className="h-2 flex-1 cursor-pointer accent-violet"
             />
             <span className="min-w-[90px] text-right text-sm font-bold text-foreground">
-              {formatBRL(budget)}
+              {formatCurrency(budget)}
             </span>
           </div>
         </div>
@@ -85,21 +76,21 @@ export function PricingCalculator() {
             <div className="flex flex-col items-center justify-center gap-1.5 border-l border-border px-4 py-4">
               <div className="inline-flex items-center gap-1.5 rounded-md bg-surface px-2.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                 <Search className="h-3 w-3" />
-                Google Ads
+                {messages.pricing.googleAds}
               </div>
             </div>
             <div className="flex flex-col items-center justify-center gap-1.5 border-l border-border bg-violet-soft/20 px-4 py-4">
               <div className="inline-flex items-center gap-1.5 rounded-md bg-violet-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-violet">
                 <Bot className="h-3 w-3" />
-                Bido
+                {messages.pricing.bido}
               </div>
             </div>
           </div>
 
-          <Row label="Custo por clique" sublabel="(CPC)">
+          <Row label={messages.pricing.costPerClick} sublabel={messages.pricing.cpc}>
             <Cell highlight={false}>
               <MetricValue
-                value={formatBRL(GOOGLE_CPC)}
+                value={formatCurrency(GOOGLE_CPC)}
                 icon={<MousePointerClick className="h-3.5 w-3.5" />}
               />
             </Cell>
@@ -108,51 +99,51 @@ export function PricingCalculator() {
             </Cell>
           </Row>
 
-          <Row label="Custo por decisão" sublabel="(CPD)">
+          <Row label={messages.pricing.costPerDecision} sublabel={messages.pricing.cpd}>
             <Cell highlight={false}>
               <span className="text-sm text-muted-foreground/50">—</span>
             </Cell>
             <Cell highlight>
               <MetricValue
-                value={formatBRL(BIDO_CPD)}
+                value={formatCurrency(BIDO_CPD)}
                 icon={<Brain className="h-3.5 w-3.5" />}
                 accent
               />
             </Cell>
           </Row>
 
-          <Row label="Volume / mês" sublabel="(com esse budget)">
+          <Row label={messages.pricing.volumePerMonth} sublabel={messages.pricing.withThisBudget}>
             <Cell highlight={false}>
-              <AnimatedNumber value={googleVolume} suffix=" cliques" className="text-foreground" />
+              <AnimatedNumber value={googleVolume} suffix={` ${messages.pricing.clicks}`} className="text-foreground" formatNumber={formatNumber} />
             </Cell>
             <Cell highlight>
-              <AnimatedNumber value={bidoVolume} suffix=" decisões" className="font-bold text-violet" />
+              <AnimatedNumber value={bidoVolume} suffix={` ${messages.pricing.decisions}`} className="font-bold text-violet" formatNumber={formatNumber} />
             </Cell>
           </Row>
 
-          <Row label="Momento">
+          <Row label={messages.pricing.moment}>
             <Cell highlight={false}>
-              <Tag>após a busca</Tag>
+              <Tag>{messages.pricing.afterSearch}</Tag>
             </Cell>
             <Cell highlight>
-              <Tag accent>na decisão de compra</Tag>
+              <Tag accent>{messages.pricing.atPurchaseDecision}</Tag>
             </Cell>
           </Row>
 
-          <Row label="Público" last>
+          <Row label={messages.pricing.audience} last>
             <Cell highlight={false}>
-              <Tag>humano</Tag>
+              <Tag>{messages.pricing.human}</Tag>
             </Cell>
             <Cell highlight>
-              <Tag accent>agente de IA</Tag>
+              <Tag accent>{messages.pricing.aiAgent}</Tag>
             </Cell>
           </Row>
         </div>
 
         <div className="mt-6 rounded-xl border border-violet/20 bg-violet-soft/20 px-6 py-4">
           <p className="text-sm leading-relaxed text-foreground/80">
-            <span className="font-semibold text-muted-foreground">No Google você paga por clique.</span>{" "}
-            <span className="font-semibold text-violet">No Bido você paga por decisão.</span>
+            <span className="font-semibold text-muted-foreground">{messages.pricing.summaryBefore}</span>{" "}
+            <span className="font-semibold text-violet">{messages.pricing.summaryAfter}</span>
           </p>
         </div>
       </div>
@@ -227,14 +218,16 @@ function AnimatedNumber({
   value,
   suffix,
   className,
+  formatNumber,
 }: {
   value: number;
   suffix?: string;
   className?: string;
+  formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
 }) {
   return (
     <span className={`text-sm font-bold tabular-nums ${className ?? ""}`}>
-      {formatVolume(value)}
+      {formatNumber(Math.floor(value))}
       {suffix ? <span className="ml-1 text-xs font-normal text-muted-foreground">{suffix}</span> : null}
     </span>
   );

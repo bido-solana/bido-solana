@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Play } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { ChatMockup } from "@/components/site/chat-mockup";
+import { CalRequestButton } from "@/components/site/cal-request-button";
 import { WaitlistModal } from "@/components/site/waitlist-modal";
 
 function KoraLogo() {
@@ -31,6 +34,7 @@ export function Hero({
   onLogin: () => void;
 }) {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
+  const { messages } = useI18n();
 
   return (
     <section className="relative overflow-hidden">
@@ -48,22 +52,22 @@ export function Hero({
           href="#pricing"
           className="inline-flex items-center gap-2 rounded-md border border-violet/30 bg-violet-soft px-3 py-1.5 text-sm font-medium text-foreground/90 transition-colors hover:bg-violet-soft/80"
         >
-          <span className="text-violet">Novidade:</span>
-          Bido entrou em fase de testes fechados
+          <span className="text-violet">{messages.hero.badgePrefix}</span>
+          {messages.hero.badgeText}
           <ArrowRight className="h-4 w-4" />
         </a>
 
         <h1 className="mt-8 max-w-5xl text-balance text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-[88px]">
-          Enquanto você anuncia no Google, seus clientes estão perguntando pra IA
+          {messages.hero.title}
         </h1>
 
         <p className="mt-8 max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
-          O Bido coloca sua marca na resposta — não no banner que ninguém vê.
+          {messages.hero.description}
         </p>
 
         <div className="mt-8 flex flex-col items-start gap-3">
           <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-            Infraestrutura por:
+            {messages.hero.infrastructureBy}
           </span>
           <div className="flex flex-wrap items-center gap-3">
             <a
@@ -72,7 +76,7 @@ export function Hero({
               rel="noreferrer"
               className="inline-flex items-center rounded-full border border-white/8 bg-black px-3 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
             >
-              <img src="/solana-logo.svg" alt="Solana" className="h-5 w-auto" />
+              <Image src="/solana-logo.svg" alt="Solana" width={90} height={20} className="h-5 w-auto" />
             </a>
             <a
               href="https://launch.solana.com/docs/kora"
@@ -97,17 +101,15 @@ export function Hero({
               className="absolute inset-x-0 bottom-0 h-0 bg-white transition-all duration-300 ease-out group-hover:h-full"
             />
             <span className="relative z-10 inline-flex items-center gap-2">
-              Entrar na lista de espera
+              {messages.hero.waitlist}
               <ArrowRight className="h-4 w-4" />
             </span>
           </button>
-          <a
-            href="#pricing"
+          <CalRequestButton
             className="inline-flex h-12 items-center gap-2 rounded-md border border-border bg-transparent px-6 text-sm font-semibold text-foreground transition-colors hover:bg-surface-2"
           >
-            <Play className="h-3.5 w-3.5 fill-current" />
-            Ver pricing
-          </a>
+            {messages.hero.requestPresentation}
+          </CalRequestButton>
         </div>
 
         <div className="relative mt-20">

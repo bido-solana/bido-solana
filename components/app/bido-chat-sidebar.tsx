@@ -2,19 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, House, Plus, Search } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type { ChatThread } from "@/lib/chat-store";
 import { BidoChatSearchModal } from "@/components/app/bido-chat-search-modal";
 
-function formatRelativeTime(value: string) {
+function formatRelativeTime(
+  value: string,
+  labels: { now: string; min: string; hour: string; day: string },
+) {
   const minutes = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 60000));
-  if (minutes < 1) return "Agora";
-  if (minutes < 60) return `${minutes} min`;
-  if (minutes < 1440) return `${Math.floor(minutes / 60)} h`;
-  return `${Math.floor(minutes / 1440)} d`;
+  if (minutes < 1) return labels.now;
+  if (minutes < 60) return `${minutes} ${labels.min}`;
+  if (minutes < 1440) return `${Math.floor(minutes / 60)} ${labels.hour}`;
+  return `${Math.floor(minutes / 1440)} ${labels.day}`;
 }
 
-function getCampaignName(thread: ChatThread) {
-  return thread.title?.trim() || "Nova campanha";
+function getCampaignName(thread: ChatThread, fallback: string) {
+  return thread.title?.trim() || fallback;
 }
 
 export function BidoChatSidebar({
@@ -36,6 +40,7 @@ export function BidoChatSidebar({
   onGoHome?: () => void;
   desktopCollapsed?: boolean;
 }) {
+  const { messages } = useI18n();
   const [recentChatsExpanded, setRecentChatsExpanded] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -68,7 +73,7 @@ export function BidoChatSidebar({
       {isOpen ? (
         <button
           type="button"
-          aria-label="Fechar sidebar"
+          aria-label={messages.common.closeSidebar}
           onClick={onClose}
           className="absolute inset-0 z-10 bg-black/20 backdrop-blur-[1px] md:hidden"
         />
@@ -95,7 +100,7 @@ export function BidoChatSidebar({
                   className="mb-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/6 bg-background/45 px-4 py-2.5 text-sm font-medium text-foreground/82 transition-all duration-200 hover:bg-background/70 hover:text-foreground"
                 >
                   <House className="size-4" />
-                  Voltar para home
+                  {messages.app.sidebar.backHome}
                 </button>
               ) : null}
               <button
@@ -104,7 +109,7 @@ export function BidoChatSidebar({
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet px-4 py-3 text-sm font-semibold text-violet-foreground transition-all duration-200 hover:bg-violet/90"
               >
                 <Plus className="size-4" />
-                Novo chat
+                {messages.app.sidebar.newChat}
               </button>
             </div>
 
@@ -115,7 +120,7 @@ export function BidoChatSidebar({
                 className="flex w-full items-center gap-3 rounded-2xl bg-background/55 px-3 py-2.5 text-left text-sm text-muted-foreground transition-all duration-200 hover:bg-background/75 hover:text-foreground"
               >
                 <Search className="size-4" />
-                Buscar chats
+                {messages.app.sidebar.searchChats}
                 <span className="ml-auto hidden rounded-full border border-white/6 bg-surface px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:inline-flex">
                   Cmd K
                 </span>
@@ -129,7 +134,7 @@ export function BidoChatSidebar({
                   onClick={() => setRecentChatsExpanded((current) => !current)}
                   className="flex flex-1 items-center justify-between rounded-xl px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <span>Chats recentes</span>
+                  <span>{messages.app.sidebar.recentChats}</span>
                   <ChevronDown
                     className={`size-4 transition-transform duration-200 ${recentChatsExpanded ? "rotate-0" : "-rotate-90"
                       }`}
@@ -156,9 +161,11 @@ export function BidoChatSidebar({
                           }`}
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <p className="line-clamp-2 text-sm leading-5">{getCampaignName(thread)}</p>
+                          <p className="line-clamp-2 text-sm leading-5">
+                            {getCampaignName(thread, messages.app.fallbackNewCampaign)}
+                          </p>
                           <span className="shrink-0 pt-0.5 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-                            {formatRelativeTime(thread.updatedAt)}
+                            {formatRelativeTime(thread.updatedAt, messages.app.relativeTime)}
                           </span>
                         </div>
                       </button>

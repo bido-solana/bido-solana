@@ -1,17 +1,19 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { CommandInput } from "@/components/site/command-input";
 import { Navbar } from "@/components/site/navbar";
 
 export function BuildPage() {
   const { authenticated, login, ready } = usePrivy();
+  const { messages } = useI18n();
 
   if (!ready) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          Carregando experiência Bido…
+          {messages.common.loadingExperience}
         </div>
       </main>
     );
@@ -33,11 +35,11 @@ export function BuildPage() {
 
           <div className="mx-auto max-w-[1200px] px-6 pb-32 pt-40 text-center">
             <h1 className="mx-auto max-w-5xl text-balance text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-[88px]">
-              Uma skill. Seus agentes ja sabem onde recomendar.
+              {messages.build.title}
             </h1>
 
             <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
-              Plugue inteligencia de ads direto no seu agente. Uma linha, zero friccao.
+              {messages.build.description}
             </p>
 
             <div className="mt-10 flex justify-center">

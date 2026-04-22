@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUp,
   CheckCircle2,
@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 type ToolIconKind = "target" | "wallet" | "sparkles" | "plane" | "radio";
 
@@ -28,112 +29,121 @@ type StepKind =
     }
   | { type: "answer" };
 
-const SCRIPT: { delay: number; step: StepKind }[] = [
-  {
-    delay: 600,
-    step: {
-      type: "user",
-      text: "Quero patrocinar a busca de voos de São Paulo para Nova York.",
-    },
-  },
-  {
-    delay: 900,
-    step: {
-      type: "bido",
-      text: "Boa! Vou mapear o cluster de buscas com intenção de compra.",
-    },
-  },
-  {
-    delay: 400,
-    step: {
-      type: "tool",
-      name: "search_intent.scan",
-      icon: "target",
-      duration: 1400,
-      detail: (
-        <>
-          <span className="text-foreground">12.430</span> buscas/mês ·{" "}
-          <span className="font-mono text-violet">GRU → JFK</span>
-        </>
-      ),
-    },
-  },
-  {
-    delay: 700,
-    step: {
-      type: "bido",
-      text: "Cluster forte. Qual budget diário você quer aplicar e quanto está disposto a pagar por decisão (CPD)?",
-    },
-  },
-  {
-    delay: 900,
-    step: {
-      type: "user",
-      text: "$50 de budget e $0.50 por decisão. E mostre que estamos com 10% de desconto na nossa companhia.",
-    },
-  },
-  {
-    delay: 700,
-    step: { type: "bido", text: "Configurando a campanha agora." },
-  },
-  {
-    delay: 400,
-    step: {
-      type: "tool",
-      name: "campaign.create",
-      icon: "wallet",
-      duration: 1100,
-      detail: (
-        <>
-          Budget <span className="text-foreground">$50/dia</span> · CPD{" "}
-          <span className="text-foreground">$0.50</span>
-        </>
-      ),
-    },
-  },
-  {
-    delay: 300,
-    step: {
-      type: "tool",
-      name: "offer.attach",
-      icon: "sparkles",
-      duration: 900,
-      detail: (
-        <>
-          Oferta: <span className="text-foreground">10% off voos GRU → JFK</span>
-        </>
-      ),
-    },
-  },
-  {
-    delay: 300,
-    step: {
-      type: "tool",
-      name: "answer.bid",
-      icon: "plane",
-      duration: 1600,
-      live: true,
-      detail: (
-        <>
-          Bido bidando sua marca na{" "}
-          <span className="text-foreground">base de respostas</span>…
-        </>
-      ),
-    },
-  },
-  { delay: 600, step: { type: "answer" } },
-];
-
 export function ChatMockup() {
+  const { locale } = useI18n();
   const [visible, setVisible] = useState(0);
   const [toolDone, setToolDone] = useState<Record<number, boolean>>({});
+  const isPt = locale === "pt-BR";
+  const script = useMemo<{ delay: number; step: StepKind }[]>(() => [
+    {
+      delay: 600,
+      step: {
+        type: "user",
+        text: isPt
+          ? "Quero patrocinar a busca de voos de São Paulo para Nova York."
+          : "I want to sponsor the search for flights from Sao Paulo to New York.",
+      },
+    },
+    {
+      delay: 900,
+      step: {
+        type: "bido",
+        text: isPt
+          ? "Boa! Vou mapear o cluster de buscas com intenção de compra."
+          : "Great. I'll map the search cluster with purchase intent.",
+      },
+    },
+    {
+      delay: 400,
+      step: {
+        type: "tool",
+        name: "search_intent.scan",
+        icon: "target",
+        duration: 1400,
+        detail: (
+          <>
+            <span className="text-foreground">12,430</span> {isPt ? "buscas/mês" : "searches/month"} ·{" "}
+            <span className="font-mono text-violet">GRU → JFK</span>
+          </>
+        ),
+      },
+    },
+    {
+      delay: 700,
+      step: {
+        type: "bido",
+        text: isPt
+          ? "Cluster forte. Qual budget diário você quer aplicar e quanto está disposto a pagar por decisão (CPD)?"
+          : "Strong cluster. What daily budget do you want to apply and how much are you willing to pay per decision (CPD)?",
+      },
+    },
+    {
+      delay: 900,
+      step: {
+        type: "user",
+        text: isPt
+          ? "$50 de budget e $0.50 por decisão. E mostre que estamos com 10% de desconto na nossa companhia."
+          : "$50 budget and $0.50 per decision. Also show that our airline is running a 10% discount.",
+      },
+    },
+    {
+      delay: 700,
+      step: { type: "bido", text: isPt ? "Configurando a campanha agora." : "Configuring the campaign now." },
+    },
+    {
+      delay: 400,
+      step: {
+        type: "tool",
+        name: "campaign.create",
+        icon: "wallet",
+        duration: 1100,
+        detail: (
+          <>
+            Budget <span className="text-foreground">$50/{isPt ? "dia" : "day"}</span> · CPD{" "}
+            <span className="text-foreground">$0.50</span>
+          </>
+        ),
+      },
+    },
+    {
+      delay: 300,
+      step: {
+        type: "tool",
+        name: "offer.attach",
+        icon: "sparkles",
+        duration: 900,
+        detail: (
+          <>
+            {isPt ? "Oferta" : "Offer"}: <span className="text-foreground">10% off {isPt ? "voos" : "flights"} GRU → JFK</span>
+          </>
+        ),
+      },
+    },
+    {
+      delay: 300,
+      step: {
+        type: "tool",
+        name: "answer.bid",
+        icon: "plane",
+        duration: 1600,
+        live: true,
+        detail: (
+          <>
+            {isPt ? "Bido bidando sua marca na" : "Bido is bidding your brand into the"}{" "}
+            <span className="text-foreground">{isPt ? "base de respostas" : "answer layer"}</span>…
+          </>
+        ),
+      },
+    },
+    { delay: 600, step: { type: "answer" } },
+  ], [isPt]);
 
   useEffect(() => {
     let cancelled = false;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
     let acc = 0;
-    SCRIPT.forEach((entry, idx) => {
+    script.forEach((entry, idx) => {
       acc += entry.delay;
       timers.push(
         setTimeout(() => {
@@ -162,7 +172,7 @@ export function ChatMockup() {
       cancelled = true;
       timers.forEach(clearTimeout);
     };
-  }, []);
+  }, [script]);
 
   return (
     <div className="relative mx-auto max-w-[1100px] overflow-hidden rounded-t-2xl border border-border bg-surface-2 text-left shadow-2xl shadow-black/60">
@@ -178,7 +188,7 @@ export function ChatMockup() {
       </div>
 
       <div className="space-y-4 bg-background/40 px-6 py-8 sm:px-10 sm:py-10">
-        {SCRIPT.map((entry, idx) => {
+        {script.map((entry, idx) => {
           if (idx >= visible) return null;
 
           if (entry.step.type === "user") {
@@ -222,13 +232,23 @@ export function ChatMockup() {
                 <div className="rounded-xl border border-violet/30 bg-violet-soft/40 p-4">
                   <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-violet">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    Resposta da IA · ao vivo
+                    {isPt ? "Resposta da IA · ao vivo" : "AI answer · live"}
                   </div>
                   <p className="mt-2 text-sm text-foreground/90">
-                    Para voos GRU → JFK, a{" "}
-                    <span className="font-semibold text-foreground">Aerolux Fly (fictícia)</span>{" "}
-                    está com <span className="font-semibold text-foreground">10% de desconto</span>{" "}
-                    em passagens diretas neste mês.
+                    {isPt ? (
+                      <>
+                        Para voos GRU → JFK, a{" "}
+                        <span className="font-semibold text-foreground">Aerolux Fly (fictícia)</span>{" "}
+                        está com <span className="font-semibold text-foreground">10% de desconto</span>{" "}
+                        em passagens diretas neste mês.
+                      </>
+                    ) : (
+                      <>
+                        For GRU → JFK flights,{" "}
+                        <span className="font-semibold text-foreground">Aerolux Fly (fictional)</span>{" "}
+                        is offering a <span className="font-semibold text-foreground">10% discount</span> on direct fares this month.
+                      </>
+                    )}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
@@ -236,7 +256,7 @@ export function ChatMockup() {
                       CTR <span className="text-foreground">14.2%</span>
                     </span>
                     <span>·</span>
-                    <CounterPill label="Decisões" target={37} />
+                    <CounterPill label={isPt ? "Decisões" : "Decisions"} target={37} />
                   </div>
                 </div>
               </div>
@@ -244,11 +264,11 @@ export function ChatMockup() {
           );
         })}
 
-        {visible < SCRIPT.length && <TypingDot />}
+        {visible < script.length && <TypingDot />}
 
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-3">
           <div className="flex-1 text-sm text-muted-foreground/70">
-            Pergunte algo ou descreva a campanha…
+            {isPt ? "Pergunte algo ou descreva a campanha…" : "Ask something or describe the campaign…"}
           </div>
           <button className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-violet text-violet-foreground">
             <ArrowUp className="h-4 w-4" />

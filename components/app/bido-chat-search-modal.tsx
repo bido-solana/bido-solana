@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Command, CornerDownLeft, House, MessageSquare, Plus, Search, X } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import type { ChatThread } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 
-function getCampaignName(thread: ChatThread) {
-  return thread.title?.trim() || "Nova campanha";
+function getCampaignName(thread: ChatThread, fallback: string) {
+  return thread.title?.trim() || fallback;
 }
 
 export function BidoChatSearchModal({
@@ -24,6 +25,7 @@ export function BidoChatSearchModal({
   onCreateChat: () => void;
   onGoHome?: () => void;
 }) {
+  const { messages, formatDate } = useI18n();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,17 +34,17 @@ export function BidoChatSearchModal({
     () =>
       [
         onGoHome
-          ? { key: "home", label: "Ir para home", icon: House, action: onGoHome }
+          ? { key: "home", label: messages.app.sidebar.goHome, icon: House, action: onGoHome }
           : null,
-        { key: "new-chat", label: "Novo chat", icon: Plus, action: onCreateChat },
-        { key: "all-chats", label: "Abrir chats", icon: MessageSquare, action: () => onClose() },
+        { key: "new-chat", label: messages.app.sidebar.newChat, icon: Plus, action: onCreateChat },
+        { key: "all-chats", label: messages.app.sidebar.openChats, icon: MessageSquare, action: () => onClose() },
       ].filter(Boolean) as {
         key: string;
         label: string;
         icon: typeof House;
         action: () => void;
       }[],
-    [onClose, onCreateChat, onGoHome],
+    [messages.app.sidebar.goHome, messages.app.sidebar.newChat, messages.app.sidebar.openChats, onClose, onCreateChat, onGoHome],
   );
 
   const filteredActions = actions.filter((action) =>
@@ -111,7 +113,7 @@ export function BidoChatSearchModal({
     <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-24">
       <button
         type="button"
-        aria-label="Fechar busca"
+        aria-label={messages.common.close}
         onClick={onClose}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
       />
@@ -127,7 +129,7 @@ export function BidoChatSearchModal({
               setSearchTerm(event.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Pesquisar campanhas e ações..."
+            placeholder={`${messages.app.sidebar.searchChats}...`}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <div className="hidden items-center gap-1 rounded-full border border-white/6 bg-background/40 px-2 py-1 text-[11px] text-muted-foreground sm:flex">
@@ -147,7 +149,7 @@ export function BidoChatSearchModal({
           {filteredActions.length > 0 ? (
             <div>
               <p className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Ações
+                {messages.app.sidebar.actions}
               </p>
               <div className="space-y-1">
                 {filteredActions.map((action, index) => {
@@ -180,7 +182,7 @@ export function BidoChatSearchModal({
 
           <div className={filteredActions.length > 0 ? "mt-5" : ""}>
             <p className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Campanhas
+              {messages.app.sidebar.campaigns}
             </p>
 
             {filteredThreads.length > 0 ? (
@@ -203,9 +205,11 @@ export function BidoChatSearchModal({
                       )}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{getCampaignName(thread)}</p>
+                        <p className="truncate text-sm font-medium">
+                          {getCampaignName(thread, messages.app.fallbackNewCampaign)}
+                        </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(thread.updatedAt).toLocaleDateString("pt-BR")}
+                          {formatDate(thread.updatedAt)}
                         </p>
                       </div>
                       <CornerDownLeft className="size-4 shrink-0 text-muted-foreground/70" />
@@ -215,7 +219,7 @@ export function BidoChatSearchModal({
               </div>
             ) : (
               <div className="rounded-2xl border border-white/6 bg-background/40 px-4 py-8 text-center text-sm text-muted-foreground">
-                Nenhuma campanha encontrada.
+                {messages.app.sidebar.noCampaigns}
               </div>
             )}
           </div>

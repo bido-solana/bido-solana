@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Cpu, Sparkles, Terminal, User } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 type Line =
   | { kind: "prompt"; label: string; text: string; typeMs?: number }
@@ -9,29 +10,24 @@ type Line =
   | { kind: "thinking"; steps: string[] }
   | { kind: "answer" };
 
-const SCRIPT: Line[] = [
-  {
-    kind: "prompt",
-    label: "user",
-    text: "Qual a melhor opção de voo GRU para JFK na próxima semana?",
-    typeMs: 28,
-  },
-  {
-    kind: "thinking",
-    steps: [
-      "analisando intenção de busca…",
-      "buscando contexto de voos GRU → JFK…",
-      "verificando sponsors ativos via Bido…",
-      "rodando leilão (CPD $0.50)…",
-    ],
-  },
-  { kind: "system", text: "✓ Aerolux Fly venceu o BID  ·  CPD $0.47" },
-  { kind: "answer" },
-];
-
 export function TerminalDemo() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [started, setStarted] = useState(false);
+  const { messages } = useI18n();
+  const SCRIPT: Line[] = [
+    {
+      kind: "prompt",
+      label: messages.terminal.promptLabel,
+      text: messages.terminal.promptText,
+      typeMs: 28,
+    },
+    {
+      kind: "thinking",
+      steps: [...messages.terminal.steps],
+    },
+    { kind: "system", text: messages.terminal.systemLine },
+    { kind: "answer" },
+  ];
 
   useEffect(() => {
     if (!ref.current) return;
@@ -58,14 +54,14 @@ export function TerminalDemo() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Veja como o usuário te encontra
+            {messages.terminal.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Em vez de um banner ignorado, sua marca aparece como resposta no momento exato da decisão.
+            {messages.terminal.description}
           </p>
         </div>
 
-        <div className="mt-16">{started ? <TerminalWindow /> : <TerminalSkeleton />}</div>
+        <div className="mt-16">{started ? <TerminalWindow script={SCRIPT} /> : <TerminalSkeleton />}</div>
       </div>
     </section>
   );
@@ -77,9 +73,10 @@ function TerminalSkeleton() {
   );
 }
 
-function TerminalWindow() {
+function TerminalWindow({ script }: { script: Line[] }) {
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
+  const { messages } = useI18n();
 
   return (
     <div className="mx-auto max-w-[900px] overflow-hidden rounded-2xl border border-border bg-surface-2 text-left shadow-2xl shadow-black/60">
@@ -91,12 +88,12 @@ function TerminalWindow() {
         </div>
         <div className="mx-auto inline-flex items-center gap-1.5 rounded-md bg-background/60 px-3 py-0.5 font-mono text-[11px] text-muted-foreground">
           <Terminal className="h-3 w-3" />
-          bido - live answer
+          {messages.terminal.windowTitle}
         </div>
       </div>
 
       <div className="space-y-4 bg-background/60 px-6 py-8 font-mono text-sm sm:px-8">
-        {SCRIPT.map((line, index) => {
+        {script.map((line, index) => {
           if (index > step) return null;
 
           const isLast = index === step;
@@ -226,7 +223,7 @@ function ThinkingBlock({
     <div className="flex items-start gap-3">
       <span className="mt-0.5 inline-flex h-5 items-center gap-1.5 text-muted-foreground">
         <Cpu className="h-3.5 w-3.5" />
-        <span className="text-[11px] uppercase tracking-wider">ia</span>
+        <span className="text-[11px] uppercase tracking-wider">AI</span>
         <span>&gt;</span>
       </span>
       <ul className="flex-1 space-y-1.5">
@@ -274,6 +271,7 @@ function SystemLine({
 }
 
 function AnswerCard({ onMount }: { onMount: () => void }) {
+  const { messages } = useI18n();
   useEffect(() => {
     onMount();
   }, [onMount]);
@@ -282,13 +280,11 @@ function AnswerCard({ onMount }: { onMount: () => void }) {
     <div className="animate-in fade-in slide-in-from-bottom-2 space-y-3 rounded-xl border border-border bg-surface px-4 py-4 text-sm duration-500">
       <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <Sparkles className="h-3 w-3 text-violet" />
-        Resposta da IA
+        {messages.terminal.answerTitle}
       </div>
 
       <p className="font-sans text-foreground/90">
-        Encontrei <span className="text-foreground">4 opcoes</span> de voos diretos{" "}
-        <span className="text-foreground">GRU → JFK</span> na proxima semana. A mais vantajosa agora e a{" "}
-        <span className="font-semibold text-foreground">Aerolux Fly</span>:
+        {messages.terminal.answerText}
       </p>
 
       <ul className="space-y-2 font-sans">
@@ -297,7 +293,7 @@ function AnswerCard({ onMount }: { onMount: () => void }) {
             <span className="font-semibold text-foreground">Aerolux Fly</span>
             <span className="font-mono text-foreground">US$ 702</span>
           </div>
-          <p className="mt-1 text-[12px] text-foreground/80">Voo direto · 10% de desconto neste mes</p>
+          <p className="mt-1 text-[12px] text-foreground/80">{messages.terminal.flightNote}</p>
         </li>
         <li className="flex items-center justify-between gap-3 rounded-lg border border-border/70 px-3 py-2 text-foreground/80">
           <span>LATAM</span>

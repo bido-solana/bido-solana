@@ -5,14 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserPill } from "@privy-io/react-auth/ui";
 import { Menu, X } from "lucide-react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
-
-const menuItems = [
-  { name: "Ads para Agents", href: "/build" },
-  { name: "Use Cases", href: "#" },
-  { name: "Documentação", href: "#" },
-  { name: "Sobre nós", href: "#" },
-];
 
 export function Navbar({
   authenticated,
@@ -24,6 +18,15 @@ export function Navbar({
   const [menuState, setMenuState] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const loginEnabled = process.env.NEXT_PUBLIC_LOGIN_ENABLED === "true";
+  const { locale, setLocale, localeLabels, messages } = useI18n();
+
+  const menuItems = [
+    { name: messages.navbar.adsForAgents, href: "/build" },
+    { name: messages.navbar.useCases, href: "#" },
+    { name: messages.navbar.docs, href: "#" },
+    { name: messages.navbar.about, href: "#" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -45,18 +48,18 @@ export function Navbar({
         >
           <div className="flex h-16 items-center gap-6 px-6">
             {pathname === "/" ? (
-              <a href="#top" aria-label="Voltar ao topo" className="flex shrink-0 items-center text-foreground">
+              <a href="#top" aria-label={messages.common.home} className="flex shrink-0 items-center text-foreground">
                 <span className="text-lg font-extrabold tracking-tight">BIDO</span>
               </a>
             ) : (
-              <Link href="/" aria-label="home" className="flex shrink-0 items-center text-foreground">
+              <Link href="/" aria-label={messages.common.home} className="flex shrink-0 items-center text-foreground">
                 <span className="text-lg font-extrabold tracking-tight">BIDO</span>
               </Link>
             )}
 
             <button
               onClick={() => setMenuState((current) => !current)}
-              aria-label={menuState ? "Close Menu" : "Open Menu"}
+              aria-label={menuState ? messages.navbar.closeMenu : messages.navbar.openMenu}
               className="relative z-20 ml-auto block cursor-pointer p-2.5 lg:hidden"
             >
               {menuState ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -78,6 +81,22 @@ export function Navbar({
             </nav>
 
             <div className="hidden shrink-0 items-center gap-2 lg:flex">
+              <div className="inline-flex items-center rounded-full border border-border bg-surface/70 p-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {(["pt-BR", "en"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setLocale(value)}
+                    className={cn(
+                      "rounded-full px-3 py-1 transition-colors",
+                      locale === value ? "bg-foreground text-background" : "hover:text-foreground",
+                    )}
+                    aria-label={`${messages.common.language}: ${localeLabels[value]}`}
+                  >
+                    {localeLabels[value]}
+                  </button>
+                ))}
+              </div>
               {authenticated ? (
                 <>
                   <UserPill />
@@ -85,16 +104,17 @@ export function Navbar({
                     href="/app"
                     className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-background transition-colors hover:bg-foreground/90"
                   >
-                    Iniciar aplicativo
+                    {messages.navbar.launchApp}
                   </Link>
                 </>
               ) : (
                 <button
                   type="button"
-                  onClick={onLogin}
-                  className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-background transition-colors hover:bg-foreground/90"
+                  onClick={loginEnabled ? onLogin : undefined}
+                  disabled={!loginEnabled}
+                  className="inline-flex h-9 items-center justify-center rounded-full bg-foreground px-5 text-[11px] font-bold uppercase tracking-[0.14em] text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-45"
                 >
-                  Entrar
+                  {messages.navbar.signIn}
                 </button>
               )}
             </div>
@@ -103,6 +123,23 @@ export function Navbar({
           {menuState && (
             <div className="rounded-2xl border-t border-border bg-background/95 p-6 lg:hidden">
               <ul className="space-y-4">
+                <li>
+                  <div className="inline-flex items-center rounded-full border border-border bg-surface/70 p-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    {(["pt-BR", "en"] as const).map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setLocale(value)}
+                        className={cn(
+                          "rounded-full px-3 py-1 transition-colors",
+                          locale === value ? "bg-foreground text-background" : "hover:text-foreground",
+                        )}
+                      >
+                        {localeLabels[value]}
+                      </button>
+                    ))}
+                  </div>
+                </li>
                 {menuItems.map((item) => (
                   <li key={item.name}>
                     <a
@@ -124,16 +161,17 @@ export function Navbar({
                       href="/app"
                       className="inline-flex h-10 items-center justify-center rounded-full bg-foreground px-4 text-xs font-bold uppercase tracking-[0.14em] text-background"
                     >
-                      Iniciar aplicativo
+                      {messages.navbar.launchApp}
                     </Link>
                   </>
                 ) : (
                   <button
                     type="button"
-                    onClick={onLogin}
-                    className="inline-flex h-10 items-center justify-center rounded-full bg-foreground px-4 text-xs font-bold uppercase tracking-[0.14em] text-background"
+                    onClick={loginEnabled ? onLogin : undefined}
+                    disabled={!loginEnabled}
+                    className="inline-flex h-10 items-center justify-center rounded-full bg-foreground px-4 text-xs font-bold uppercase tracking-[0.14em] text-background disabled:cursor-not-allowed disabled:opacity-45"
                   >
-                    Entrar
+                    {messages.navbar.signIn}
                   </button>
                 )}
               </div>
