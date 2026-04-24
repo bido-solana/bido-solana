@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authenticatePrivyRequest } from "@/lib/api/privy-auth";
+import { badRequest, internalError } from "@/lib/api/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { syncSponsorSchema } from "@/lib/validators/sponsor";
 
@@ -21,10 +22,7 @@ export async function POST(request: NextRequest) {
 
     const parsed = syncSponsorSchema.safeParse(body ?? {});
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid body", details: parsed.error.flatten() },
-        { status: 400 }
-      );
+      return badRequest("Invalid body", parsed.error.flatten());
     }
     const input = parsed.data;
 
@@ -38,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (lookupErr) {
       console.error("[sponsors/sync] lookup failed:", lookupErr);
-      return NextResponse.json({ error: "Internal error" }, { status: 500 });
+      return internalError();
     }
 
     if (!existing) {
@@ -55,7 +53,7 @@ export async function POST(request: NextRequest) {
 
       if (insertErr) {
         console.error("[sponsors/sync] insert failed:", insertErr);
-        return NextResponse.json({ error: "Internal error" }, { status: 500 });
+        return internalError();
       }
       return NextResponse.json(inserted, { status: 201 });
     }
@@ -80,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     if (updateErr) {
       console.error("[sponsors/sync] update failed:", updateErr);
-      return NextResponse.json({ error: "Internal error" }, { status: 500 });
+      return internalError();
     }
     return NextResponse.json(updated);
   } catch (err) {

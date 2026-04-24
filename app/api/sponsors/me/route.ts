@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { authenticatePrivyRequest } from "@/lib/api/privy-auth";
+import { internalError, notFound } from "@/lib/api/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
@@ -16,19 +17,16 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("[sponsors/me] lookup failed:", error);
-      return NextResponse.json({ error: "Internal error" }, { status: 500 });
+      return internalError();
     }
 
     if (!data) {
-      return NextResponse.json(
-        { error: "Sponsor not found. Call /api/sponsors/sync first." },
-        { status: 404 }
-      );
+      return notFound("Sponsor. Call /api/sponsors/sync first.");
     }
 
     return NextResponse.json(data);
   } catch (err) {
     console.error("[sponsors/me] unexpected error:", err);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    return internalError();
   }
 }
