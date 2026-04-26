@@ -22,10 +22,10 @@ export function Navbar({
   const { locale, setLocale, localeLabels, messages } = useI18n();
 
   const menuItems = [
-    { name: messages.navbar.adsForAgents, href: "/build" },
+    { name: messages.navbar.adsForAgents, href: "/sponsors" },
+    { name: messages.navbar.forDevs, href: "/devs" },
     { name: messages.navbar.useCases, href: "#" },
     { name: messages.navbar.docs, href: "#" },
-    { name: messages.navbar.about, href: "#" },
   ];
 
   useEffect(() => {
@@ -69,12 +69,12 @@ export function Navbar({
               <ul className="flex items-center gap-1">
                 {menuItems.map((item) => (
                   <li key={item.name}>
-                    <a
+                    <Link
                       href={item.href}
                       className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground"
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -142,12 +142,12 @@ export function Navbar({
                 </li>
                 {menuItems.map((item) => (
                   <li key={item.name}>
-                    <a
+                    <Link
                       href={item.href}
                       className="block text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

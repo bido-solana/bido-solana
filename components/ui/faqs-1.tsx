@@ -6,9 +6,10 @@ import {
 } from "@/components/ui/accordion";
 import { useI18n } from "@/components/providers/i18n-provider";
 
-export function FaqsSection() {
+export function FaqsSection({ variant = "sponsors" }: { variant?: "sponsors" | "devs" }) {
   const { messages } = useI18n();
-  const questions = messages.faq.questions;
+  const faq = variant === "devs" ? messages.devs.faq : messages.faq;
+  const questions = faq.questions;
 
   return (
     <section className="border-t border-border/60 py-32">
@@ -16,18 +17,18 @@ export function FaqsSection() {
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="space-y-5">
             <div className="inline-flex items-center rounded-full border border-violet/25 bg-violet-soft/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet">
-              {messages.faq.badge}
+              {faq.badge}
             </div>
             <div className="space-y-3">
               <h2 className="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
-                {messages.faq.title}
+                {faq.title}
               </h2>
               <p className="max-w-2xl text-lg text-muted-foreground">
-                {messages.faq.description}
+                {faq.description}
               </p>
             </div>
             <p className="text-sm text-muted-foreground">
-              {messages.faq.contactLead}
+              {faq.contactLead}
               <a
                 href="mailto:hello@bido.ai"
                 className="text-violet transition-colors hover:text-foreground"

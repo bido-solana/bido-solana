@@ -1,18 +1,36 @@
 "use client";
 
+import Link from "next/link";
+import Image from "next/image";
 import { usePrivy } from "@privy-io/react-auth";
-import { Hero } from "@/components/site/hero";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/site/navbar";
-import { PricingCalculator } from "@/components/site/pricing-calculator";
-import { TerminalDemo } from "@/components/site/terminal-demo";
-import { FaqsSection } from "@/components/ui/faqs-1";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { Banknote, Gauge, Target, LineChart } from "lucide-react";
 
 function XIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="size-4">
       <path d="M18.901 1.153h3.68l-8.04 9.19 9.458 12.504h-7.405l-5.8-7.584-6.633 7.584H.48l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932Zm-1.291 19.492h2.039L6.486 3.24H4.298L17.61 20.645Z" />
+    </svg>
+  );
+}
+
+function KoraLogo() {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" aria-hidden="true" className="h-4 w-4">
+      <path d="M17.1818 17.1818H0.818176V0.818159L17.1818 17.1818Z" fill="url(#kora_paint0_linear)" fillOpacity="0.44" />
+      <path d="M17.1818 0.818192H0.818176V17.1818L17.1818 0.818192Z" fill="#474747" />
+      <path d="M17.1818 0.818192H0.818176V17.1818L17.1818 0.818192Z" fill="url(#kora_paint1_linear)" />
+      <defs>
+        <linearGradient id="kora_paint0_linear" x1="8.99999" y1="17.1818" x2="8.99999" y2="0.818159" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#3C3633" />
+          <stop offset="1" stopColor="#5F5149" />
+        </linearGradient>
+        <linearGradient id="kora_paint1_linear" x1="8.99999" y1="0.818192" x2="8.99999" y2="17.1818" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#3C3633" />
+          <stop offset="1" stopColor="#5F5149" />
+        </linearGradient>
+      </defs>
     </svg>
   );
 }
@@ -28,13 +46,8 @@ function GitHubIcon() {
 export default function HomePage() {
   const { ready, authenticated, login } = usePrivy();
   const { messages, replace } = useI18n();
-
-  const features = [
-    { icon: Banknote, ...messages.home.features[0] },
-    { icon: Gauge, ...messages.home.features[1] },
-    { icon: Target, ...messages.home.features[2] },
-    { icon: LineChart, ...messages.home.features[3] },
-  ];
+  const cards = messages.home.audienceCards;
+  const infrastructure = messages.home.infrastructure;
 
   if (!ready) {
     return (
@@ -49,53 +62,159 @@ export default function HomePage() {
   return (
     <div id="top" className="min-h-screen bg-background text-foreground">
       <Navbar authenticated={authenticated} onLogin={login} />
-      <main>
-        <Hero authenticated={authenticated} onLogin={login} />
 
-        <section className="border-t border-border/60 py-32">
-          <div className="mx-auto max-w-6xl px-6">
-            <h2 className="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-              {messages.home.featuresTitle}
-            </h2>
-            <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-              {messages.home.featuresDescription}
+      <main>
+        {/* ── Hero ── */}
+        <section className="relative overflow-hidden">
+          {/* ambient glow */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[700px] w-[1200px] -translate-x-1/2 rounded-full opacity-35 blur-3xl"
+            style={{
+              background:
+                "radial-gradient(closest-side, oklch(0.4 0.15 295 / 0.5), transparent 70%)",
+            }}
+          />
+
+          <div className="mx-auto max-w-[1100px] px-6 pb-32 pt-40 text-center">
+            {/* badge */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet-soft px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet">
+              {messages.home.badge}
+            </div>
+
+            {/* headline — always English per brand copy */}
+            <h1 className="mx-auto max-w-4xl text-balance text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-[80px]">
+              {messages.home.headline}
+            </h1>
+
+            <p className="mx-auto mt-8 max-w-2xl text-balance text-lg text-muted-foreground sm:text-xl">
+              {messages.home.subheadline}
             </p>
 
-            <div className="mt-16 grid gap-6 sm:grid-cols-2">
-              {features.map((f) => (
-                <div
-                  key={f.title}
-                  className="rounded-2xl border border-border bg-surface-2 p-6"
-                >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-violet-soft text-violet">
-                    <f.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-xl font-bold">{f.title}</h3>
-                  <p className="mt-2 text-muted-foreground">{f.desc}</p>
+            {/* infrastructure logos */}
+            {/* <div className="mt-10 flex flex-col items-center gap-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  {messages.hero.infrastructureBy}
+                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href="https://solana.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center rounded-full border border-white/8 bg-black px-3 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.18)] transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    <Image src="/solana-logo.svg" alt={infrastructure.solanaName} width={90} height={20} className="h-5 w-auto" />
+                  </a>
+                  <a
+                    href="https://launch.solana.com/docs/kora"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3 py-2 text-sm font-medium text-foreground/80 backdrop-blur-xl transition-transform duration-200 hover:-translate-y-0.5"
+                  >
+                    <KoraLogo />
+                    <span>{infrastructure.koraName}</span>
+                  </a>
                 </div>
-              ))}
+              </div> */}
+            
+          </div>
+        </section>
+
+        {/* ── Split Audience Cards ── */}
+        <section className="border-t border-border/60 py-24">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="grid gap-6 sm:grid-cols-2">
+
+              {/* For Sponsors */}
+              <Link
+                href="/sponsors"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-surface-2 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-violet/40 hover:shadow-[0_20px_60px_rgba(124,58,237,0.12)]"
+              >
+                {/* subtle corner glow */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30"
+                  style={{ background: "oklch(0.5 0.2 295)" }}
+                />
+
+                <div>
+                  <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-soft text-violet">
+                    {/* target icon */}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="6" />
+                      <circle cx="12" cy="12" r="2" />
+                    </svg>
+                  </div>
+
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-violet">
+                    {cards.sponsors.label}
+                  </p>
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    {cards.sponsors.title}
+                  </h2>
+                  <p className="mt-3 text-muted-foreground leading-relaxed">
+                    {cards.sponsors.description}
+                  </p>
+                </div>
+
+                <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-violet transition-gap duration-200 group-hover:gap-3">
+                  {cards.sponsors.label}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
+              </Link>
+
+              {/* For Devs */}
+              <Link
+                href="/devs"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-surface-2 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/40 hover:shadow-[0_20px_60px_rgba(16,185,129,0.10)]"
+              >
+                {/* subtle corner glow */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-20"
+                  style={{ background: "oklch(0.7 0.2 160)" }}
+                />
+
+                <div>
+                  <div className="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+                    {/* code / terminal icon */}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                  </div>
+
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+                    {cards.devs.label}
+                  </p>
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    {cards.devs.title}
+                  </h2>
+                  <p className="mt-3 text-muted-foreground leading-relaxed">
+                    {cards.devs.description}
+                  </p>
+                </div>
+
+                <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 transition-gap duration-200 group-hover:gap-3">
+                  {cards.devs.label}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </div>
+              </Link>
             </div>
           </div>
         </section>
 
-        <TerminalDemo />
-
-
-        <section id="pricing" className="border-t border-border/60">
-          <PricingCalculator />
-        </section>
-
-        <FaqsSection />
-        
+        {/* ── Footer ── */}
         <footer className="border-t border-border/60 py-12">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 text-sm text-muted-foreground">
-            <span>{replace(messages.home.footerCopy, { year: new Date().getFullYear() })}</span>
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 text-sm text-muted-foreground">
+            <span>{replace(messages.common.footerCopy, { year: new Date().getFullYear() })}</span>
             <div className="flex items-center gap-3">
               <a
                 href="https://x.com/usebido"
                 target="_blank"
                 rel="noreferrer"
-                aria-label="X"
+                aria-label={messages.common.socialX}
                 className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-surface-2 transition-colors hover:text-foreground"
               >
                 <XIcon />
@@ -104,7 +223,7 @@ export default function HomePage() {
                 href="https://github.com/bido-solana"
                 target="_blank"
                 rel="noreferrer"
-                aria-label="GitHub"
+                aria-label={messages.common.socialGitHub}
                 className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-surface-2 transition-colors hover:text-foreground"
               >
                 <GitHubIcon />

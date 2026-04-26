@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BuildPage } from "@/components/site/build-page";
+import SponsorsPage from "@/app/sponsors/sponsors-page";
 
 export const metadata: Metadata = {
   title: "Ads para Agents - Skills para agentes de IA",
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function BuildRoutePage() {
-  return <BuildPage />;
+  return <SponsorsPage />;
 }

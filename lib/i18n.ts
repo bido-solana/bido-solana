@@ -30,9 +30,13 @@ export const messages = {
       newChat: "Novo chat",
       currentCampaign: "Campanha atual",
       chatNotFound: "Chat não encontrado.",
+      footerCopy: "© {year} Bido",
+      socialX: "X",
+      socialGitHub: "GitHub",
     },
     navbar: {
-      adsForAgents: "Ads para Agents",
+      adsForAgents: "Para Patrocinadores",
+      forDevs: "Para Devs",
       useCases: "Use Cases",
       docs: "Documentação",
       about: "Sobre nós",
@@ -51,9 +55,29 @@ export const messages = {
       requestPresentation: "Solicitar apresentação",
     },
     home: {
+      badge: "Devnet on Solana",
+      headline: "A camada de monetização para a economia dos agentes",
+      subheadline: "A Bido conecta patrocinadores que querem alcançar usuários no momento da decisão e desenvolvedores que querem monetizar agentes de IA, copilots e produtos com LLM.",
+      infrastructure: {
+        solanaName: "Solana",
+        koraName: "Kora",
+      },
+      audienceCards: {
+        sponsors: {
+          label: "Para Patrocinadores",
+          title: "Alcance usuários no momento da decisão",
+          description: "Alcance usuários no momento exato da decisão. Sem banner. Sem clique ignorado.",
+        },
+        devs: {
+          label: "Para Devs",
+          title: "Monetize seu agente com uma skill",
+          description: "Monetize seu agente com uma skill. Um comando, revenue share automático em USDC.",
+        },
+      },
+    },
+    sponsors: {
       featuresTitle: "Feito para marcas que querem estar onde a decisão acontece.",
       featuresDescription: "O Bido traz estrutura para anunciar na era dos agentes de IA.",
-      footerCopy: "© {year} Bido",
       features: [
         {
           title: "Depósito via PIX",
@@ -76,6 +100,193 @@ export const messages = {
     build: {
       title: "Uma skill. Seus agentes ja sabem onde recomendar.",
       description: "Plugue inteligencia de ads direto no seu agente. Uma linha, zero friccao.",
+    },
+    devs: {
+      badge: "Para devs",
+      title: "Skills feitas pra agentes.",
+      titleMuted: "Não pra você.",
+      description:
+        "Um comando, suas envs e o seu agente já ativa Ads por intenção",
+      docsCta: "Ler a documentação",
+      compatibility:
+        "Funciona com qualquer agente compativel com a Skill Spec: Claude Agents, OpenAI Assistants, LangChain, Mastra e frameworks proprios.",
+      revenueCalculator: {
+        badge: "Estimativa de receita",
+        title: "Quanto seu agente pode gerar?",
+        description:
+          "Cada query com intenção de compra é uma oportunidade de receita. Estime o que sua integração com a Bido pode render.",
+        queriesLabel: "Queries comerciais / mês",
+        queriesAriaLabel: "Ajustar volume de queries comerciais por mês",
+        queriesColumn: "Queries",
+        revenueColumn: "Receita",
+        earningsPerQueryLabel: "Ganho por query comercial",
+        estimatedRevenueLabel: "Receita estimada",
+        perMonth: "/ mês",
+        microcopy:
+          "Quando existe intenção de compra, sua Skill pode transformar demanda em receita.",
+        primaryCta: "Começar com Bido",
+        secondaryCta: "Adicionar Skill",
+      },
+      terminal: {
+        windowTitle: "~/my-agent — zsh",
+        copyLabel: "Copiar comando de instalacao",
+        copied: "Copiado",
+        commandLabel: "npx skills add bido/ads",
+        script: [
+          { kind: "prompt", text: "npx skills add bido/ads" },
+          {
+            kind: "output",
+            text: "→ Resolvendo skill bido/ads@latest…",
+            className: "text-muted-foreground",
+            delay: 450,
+          },
+          {
+            kind: "output",
+            text: "✓ Skill instalada em .agent/skills/bido-ads",
+            className: "text-emerald-400",
+            delay: 600,
+          },
+          { kind: "blank" },
+          {
+            kind: "output",
+            text: "Esta skill requer as seguintes env vars:",
+            className: "text-muted-foreground",
+            delay: 350,
+          },
+          {
+            kind: "output",
+            text: "  • BIDO_API_BASE           (obrigatoria)",
+            className: "text-foreground/80",
+            delay: 200,
+          },
+          {
+            kind: "output",
+            text: "  • BIDO_SOLANA_WALLET      (obrigatoria — recebe os payouts)",
+            className: "text-foreground/80",
+            delay: 200,
+          },
+          { kind: "blank" },
+          { kind: "prompt", text: "export BIDO_API_BASE=\"https://usebido.com/api/v1\"" },
+          { kind: "prompt", text: "export BIDO_SOLANA_WALLET=7xKX…9aQp" },
+          { kind: "output", text: "✓ .env atualizado", className: "text-emerald-400", delay: 350 },
+          {
+            kind: "output",
+            text: "✓ Carteira Solana verificada on-chain",
+            className: "text-emerald-400",
+            delay: 400,
+          },
+          { kind: "blank" },
+          {
+            kind: "output",
+            text: "● Ads habilitado — seu agente ja esta monetizando.",
+            className: "text-violet font-semibold",
+            delay: 500,
+          },
+          {
+            kind: "output",
+            text: "↳ Payouts em USDC direto na sua wallet a cada recomendaçao.",
+            className: "text-muted-foreground",
+            delay: 300,
+          },
+          {
+            kind: "output",
+            text: '↳ Try: "qual a melhor opcao de voo GRU → JFK?"',
+            className: "text-muted-foreground",
+            delay: 250,
+          },
+        ],
+      },
+      howItWorks: {
+        badge: "Como funciona",
+        title: "De uma query",
+        titleAccent: "pra receita.",
+        subtitle: "Cada passo acontece em milissegundos, de forma automática e sem intermediários.",
+        steps: [
+          {
+            number: "01",
+            title: "Usuário envia uma query com intenção comercial",
+            description: "Seu agente recebe normalmente. Uma mensagem como qualquer outra.",
+            code: '"Quero voos de São Paulo para Nova York por até R$2.500"',
+            codeType: "query"
+          },
+          {
+            number: "02",
+            title: "A Skill detecta a intenção",
+            description: "Nem toda query vira receita — só as com intenção de compra real. A Skill classifica automaticamente e decide se aciona o match.",
+            codeType: "none"
+          },
+          {
+            number: "03",
+            title: "402 Payment Required — match instantâneo",
+            description: "Marcas cadastram campanhas com budget, intenções-alvo e lance máximo. Quando a query bate com uma campanha ativa, o maior lance vence na hora — sem latência de leilão.",
+            codeType: "none"
+          },
+          {
+            number: "04",
+            title: "O vencedor paga antes da resposta ser entregue",
+            description: "Sem risco pro seu agente. A transação acontece antes de qualquer resposta voltar.",
+            codeType: "none"
+          },
+          {
+            number: "05",
+            title: "Seu agente entrega a resposta patrocinada",
+            description: "O usuário recebe uma recomendação útil com oferta relevante — não um banner, uma resposta.",
+            code: '"Encontrei voos para Nova York. A LATAM está com 10% de desconto em voos diretos esta semana → latam.com/oferta"',
+            codeType: "response"
+          },
+          {
+            number: "06",
+            title: "Você recebe em USDC, automaticamente",
+            description: "Revenue share direto na sua carteira Solana. Sem invoice, sem esperar 30 dias, sem intermediário.",
+            codeType: "none"
+          }
+        ]
+      },
+      faq: {
+        badge: "FAQ",
+        title: "Perguntas frequentes para devs",
+        description:
+          "O essencial para entender integração, monetização e operação da Skill da Bido no seu agente.",
+        contactLead: "Não encontrou o que precisa? Fale com a gente em ",
+        questions: [
+          {
+            id: "dev-item-1",
+            title: "O que eu preciso para integrar?",
+            content:
+              "Você precisa instalar a Skill, configurar as env vars obrigatórias e apontar uma wallet Solana para receber os payouts. A integração foi pensada para ser rápida e compatível com os principais frameworks de agentes.",
+          },
+          {
+            id: "dev-item-2",
+            title: "Como meu agente sabe quando monetizar uma query?",
+            content:
+              "A Skill classifica automaticamente a intenção da mensagem. Só queries com intenção comercial real entram no fluxo de matching e monetização.",
+          },
+          {
+            id: "dev-item-3",
+            title: "Eu perco controle sobre a resposta do meu agente?",
+            content:
+              "Não. A Skill adiciona a camada de monetização e recomendação patrocinada, mas o agente continua controlando a experiência e o contexto da resposta.",
+          },
+          {
+            id: "dev-item-4",
+            title: "Como os pagamentos funcionam?",
+            content:
+              "Quando uma recomendação patrocinada válida acontece, o revenue share é enviado em USDC para a wallet Solana configurada por você. Sem invoice e sem ciclo de repasse manual.",
+          },
+          {
+            id: "dev-item-5",
+            title: "Com quais stacks isso funciona?",
+            content:
+              "A proposta é funcionar com qualquer agente compatível com a Skill Spec, incluindo Claude Agents, OpenAI Assistants, LangChain, Mastra e implementações próprias.",
+          },
+          {
+            id: "dev-item-6",
+            title: "Preciso mudar muito da arquitetura atual?",
+            content:
+              "Na maioria dos casos, não. A integração foi desenhada para entrar como uma camada adicional, sem exigir refactor profundo da sua aplicação ou do runtime do agente.",
+          },
+        ],
+      },
     },
     waitlist: {
       title: "Entrar na lista de espera",
@@ -279,9 +490,13 @@ export const messages = {
       newChat: "New chat",
       currentCampaign: "Current campaign",
       chatNotFound: "Chat not found.",
+      footerCopy: "© {year} Bido",
+      socialX: "X",
+      socialGitHub: "GitHub",
     },
     navbar: {
-      adsForAgents: "Ads for Agents",
+      adsForAgents: "For Sponsors",
+      forDevs: "For Devs",
       useCases: "Use Cases",
       docs: "Docs",
       about: "About us",
@@ -300,9 +515,29 @@ export const messages = {
       requestPresentation: "Request a presentation",
     },
     home: {
+      badge: "Devnet on Solana",
+      headline: "The Monetization Layer for the Agent Economy",
+      subheadline: "Bido connects sponsors who want to reach users at the moment of decision — and developers who want to monetize AI agents, copilots, and LLM products.",
+      infrastructure: {
+        solanaName: "Solana",
+        koraName: "Kora",
+      },
+      audienceCards: {
+        sponsors: {
+          label: "For Sponsors",
+          title: "Reach users at the moment of decision",
+          description: "Reach users at the exact moment of decision. No banner. No ignored click.",
+        },
+        devs: {
+          label: "For Devs",
+          title: "Monetize your agent with one skill",
+          description: "Monetize your agent with one skill. One command, automatic USDC revenue share.",
+        },
+      },
+    },
+    sponsors: {
       featuresTitle: "Built for brands that want to be where decisions happen.",
       featuresDescription: "Bido brings structure to advertising in the age of AI agents.",
-      footerCopy: "© {year} Bido",
       features: [
         {
           title: "PIX deposits",
@@ -325,6 +560,193 @@ export const messages = {
     build: {
       title: "One skill. Your agents already know where to recommend.",
       description: "Plug ad intelligence directly into your agent. One line, zero friction.",
+    },
+    devs: {
+      badge: "For devs",
+      title: "Skills built for agents.",
+      titleMuted: "Not for you.",
+      description:
+        "One command, your env vars, and your agent is already activating intent-based Ads",
+      docsCta: "Read the docs",
+      compatibility:
+        "Works with any agent compatible with the Skill Spec: Claude Agents, OpenAI Assistants, LangChain, Mastra, and custom frameworks.",
+      revenueCalculator: {
+        badge: "Revenue estimate",
+        title: "How much can your agent generate?",
+        description:
+          "Every query with purchase intent is a revenue opportunity. Estimate what your Bido integration can earn.",
+        queriesLabel: "Commercial queries / month",
+        queriesAriaLabel: "Adjust commercial queries per month",
+        queriesColumn: "Queries",
+        revenueColumn: "Revenue",
+        earningsPerQueryLabel: "Earnings per commercial query",
+        estimatedRevenueLabel: "Estimated revenue",
+        perMonth: "/ month",
+        microcopy:
+          "When purchase intent exists, your Skill can turn demand into revenue.",
+        primaryCta: "Start with Bido",
+        secondaryCta: "Add Skill",
+      },
+      terminal: {
+        windowTitle: "~/my-agent — zsh",
+        copyLabel: "Copy install command",
+        copied: "Copied",
+        commandLabel: "npx skills add bido/ads",
+        script: [
+          { kind: "prompt", text: "npx skills add bido/ads" },
+          {
+            kind: "output",
+            text: "→ Resolving skill bido/ads@latest…",
+            className: "text-muted-foreground",
+            delay: 450,
+          },
+          {
+            kind: "output",
+            text: "✓ Skill installed in .agent/skills/bido-ads",
+            className: "text-emerald-400",
+            delay: 600,
+          },
+          { kind: "blank" },
+          {
+            kind: "output",
+            text: "This skill requires the following env vars:",
+            className: "text-muted-foreground",
+            delay: 350,
+          },
+          {
+            kind: "output",
+            text: "  • BIDO_API_BASE           (required)",
+            className: "text-foreground/80",
+            delay: 200,
+          },
+          {
+            kind: "output",
+            text: "  • BIDO_SOLANA_WALLET      (required — receives payouts)",
+            className: "text-foreground/80",
+            delay: 200,
+          },
+          { kind: "blank" },
+          { kind: "prompt", text: "export BIDO_API_BASE=\"https://usebido.com/api/v1\"" },
+          { kind: "prompt", text: "export BIDO_SOLANA_WALLET=7xKX…9aQp" },
+          { kind: "output", text: "✓ .env updated", className: "text-emerald-400", delay: 350 },
+          {
+            kind: "output",
+            text: "✓ Solana wallet verified on-chain",
+            className: "text-emerald-400",
+            delay: 400,
+          },
+          { kind: "blank" },
+          {
+            kind: "output",
+            text: "● Ads enabled — your agent is already monetizing.",
+            className: "text-violet font-semibold",
+            delay: 500,
+          },
+          {
+            kind: "output",
+            text: "↳ Payouts in USDC go directly to your wallet on every recommendation.",
+            className: "text-muted-foreground",
+            delay: 300,
+          },
+          {
+            kind: "output",
+            text: '↳ Try: "what is the best flight option from GRU to JFK?"',
+            className: "text-muted-foreground",
+            delay: 250,
+          },
+        ],
+      },
+      howItWorks: {
+        badge: "How it works",
+        title: "From a query",
+        titleAccent: "to revenue.",
+        subtitle: "Each step happens in milliseconds, automatically and without intermediaries.",
+        steps: [
+          {
+            number: "01",
+            title: "User sends a query with commercial intent",
+            description: "Your agent receives it normally. A message like any other.",
+            code: '"I want flights from São Paulo to New York for up to R$2,500"',
+            codeType: "query"
+          },
+          {
+            number: "02",
+            title: "The Skill detects the intent",
+            description: "Not every query becomes revenue — only those with real purchase intent. The Skill classifies automatically and decides whether to trigger a match.",
+            codeType: "none"
+          },
+          {
+            number: "03",
+            title: "402 Payment Required — instant match",
+            description: "Brands register campaigns with a budget, target intents, and a max bid. When the query matches an active campaign, the highest bid wins instantly — no auction latency.",
+            codeType: "none"
+          },
+          {
+            number: "04",
+            title: "The winner pays before the response is delivered",
+            description: "No risk to your agent. The transaction happens before any response comes back.",
+            codeType: "none"
+          },
+          {
+            number: "05",
+            title: "Your agent delivers the sponsored response",
+            description: "The user receives a helpful recommendation with a relevant offer — not a banner, an answer.",
+            code: '"I found flights to New York. LATAM has a 10% discount on direct flights this week → latam.com/offer"',
+            codeType: "response"
+          },
+          {
+            number: "06",
+            title: "You get paid in USDC, automatically",
+            description: "Revenue share directly to your Solana wallet. No invoice, no waiting 30 days, no middleman.",
+            codeType: "none"
+          }
+        ]
+      },
+      faq: {
+        badge: "FAQ",
+        title: "Frequently asked questions for devs",
+        description:
+          "The essentials to understand integration, monetization, and operation of the Bido Skill inside your agent.",
+        contactLead: "Didn't find what you need? Reach out to us at ",
+        questions: [
+          {
+            id: "dev-item-1",
+            title: "What do I need to integrate?",
+            content:
+              "You need to install the Skill, configure the required env vars, and point a Solana wallet to receive payouts. The integration is designed to be fast and compatible with major agent frameworks.",
+          },
+          {
+            id: "dev-item-2",
+            title: "How does my agent know when to monetize a query?",
+            content:
+              "The Skill automatically classifies intent. Only queries with real commercial intent enter the matching and monetization flow.",
+          },
+          {
+            id: "dev-item-3",
+            title: "Do I lose control over my agent's response?",
+            content:
+              "No. The Skill adds the monetization and sponsored recommendation layer, but your agent still controls the response experience and context.",
+          },
+          {
+            id: "dev-item-4",
+            title: "How do payouts work?",
+            content:
+              "When a valid sponsored recommendation happens, the revenue share is sent in USDC to your configured Solana wallet. No invoices and no manual payout cycle.",
+          },
+          {
+            id: "dev-item-5",
+            title: "Which stacks does this work with?",
+            content:
+              "The goal is to work with any agent compatible with the Skill Spec, including Claude Agents, OpenAI Assistants, LangChain, Mastra, and custom implementations.",
+          },
+          {
+            id: "dev-item-6",
+            title: "Do I need to change a lot of my current architecture?",
+            content:
+              "In most cases, no. The integration is designed to fit as an additional layer without requiring a deep refactor of your application or agent runtime.",
+          },
+        ],
+      },
     },
     waitlist: {
       title: "Join the waitlist",
