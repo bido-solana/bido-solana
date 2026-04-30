@@ -1,15 +1,16 @@
 "use client";
 
-import { campaignToForm, useCampaign } from "@/lib/campaign-store";
+import { campaignToForm, useCampaign } from "@/lib/hooks/use-campaigns";
 import { NewCampaignScreen } from "@/components/app/new-campaign-screen";
+import { OrbitalLoader } from "@/components/ui/orbital-loader";
 
 export function EditCampaignScreen({ campaignId }: { campaignId: string }) {
   const { campaign, loading, error } = useCampaign(campaignId);
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-border bg-card px-5 py-10 text-center text-sm text-muted-foreground">
-        Carregando campanha...
+      <div className="flex items-center justify-center rounded-2xl border border-border bg-card px-5 py-16">
+        <OrbitalLoader message="Carregando campanha..." />
       </div>
     );
   }

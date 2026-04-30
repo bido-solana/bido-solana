@@ -20,8 +20,10 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ShimmerBlock } from "@/components/ui/animated-loading-skeleton";
+import { OrbitalLoader } from "@/components/ui/orbital-loader";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { useCampaign, useCampaignActions, useCampaignAnalytics } from "@/lib/campaign-store";
+import { useCampaign, useCampaignActions, useCampaignAnalytics } from "@/lib/hooks/use-campaigns";
 
 function KpiCard({
   label,
@@ -298,11 +300,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
   }
 
   if (loading) {
-    return (
-      <div className="rounded-2xl border border-border bg-card px-5 py-10 text-center text-sm text-muted-foreground">
-        Carregando campanha...
-      </div>
-    );
+    return <CampaignDetailSkeleton />;
   }
 
   if (!currentCampaign) {
@@ -568,7 +566,9 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
           </CardHeader>
           <CardContent className="px-2.5">
             {analyticsLoading ? (
-              <div className="px-4 pb-6 text-sm text-muted-foreground">Carregando analytics...</div>
+              <div className="flex items-center justify-center py-10">
+                <OrbitalLoader message="Carregando analytics..." />
+              </div>
             ) : null}
             <div className="px-2.5">
               <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -677,6 +677,61 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
             </ChartContainer>
           </CardContent>
         </Card>
+      </section>
+    </>
+  );
+}
+
+function CampaignDetailSkeleton() {
+  return (
+    <>
+      <header className="mb-5">
+        <ShimmerBlock className="mb-2 h-7 w-72 rounded" />
+        <ShimmerBlock className="h-4 w-96 rounded" />
+      </header>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <ShimmerBlock className="h-10 w-44 rounded-2xl" />
+        <div className="flex gap-2">
+          <ShimmerBlock className="h-10 w-28 rounded-2xl" />
+          <ShimmerBlock className="h-10 w-28 rounded-2xl" />
+        </div>
+      </div>
+
+      <section className="rounded-2xl border border-border bg-card p-6">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-border bg-background p-5"
+            >
+              <ShimmerBlock className="mb-3 h-3 w-24 rounded" />
+              <ShimmerBlock className="h-8 w-32 rounded" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-2xl border border-border bg-card p-6">
+        <ShimmerBlock className="mb-2 h-3 w-40 rounded" />
+        <ShimmerBlock className="mb-1 h-6 w-56 rounded" />
+        <ShimmerBlock className="mb-4 h-4 w-80 rounded" />
+        <div className="grid gap-3 md:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-border bg-background p-5"
+            >
+              <ShimmerBlock className="mb-3 h-3 w-20 rounded" />
+              <ShimmerBlock className="h-7 w-24 rounded" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-2xl border border-border bg-card p-6">
+        <ShimmerBlock className="mb-6 h-5 w-48 rounded" />
+        <ShimmerBlock className="h-[420px] w-full rounded-xl" />
       </section>
     </>
   );

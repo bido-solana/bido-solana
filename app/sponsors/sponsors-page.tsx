@@ -37,19 +37,9 @@ export default function SponsorsPage() {
     { icon: LineChart, ...sponsors.features[3] },
   ];
 
-  if (!ready) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-        <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          {messages.common.loadingExperience}
-        </div>
-      </main>
-    );
-  }
-
   return (
     <div id="top" className="min-h-screen bg-background text-foreground">
-      <Navbar authenticated={authenticated} onLogin={login} />
+      <Navbar authenticated={authenticated} onLogin={login} ready={ready} />
       <main>
         <Hero
           authenticated={authenticated}

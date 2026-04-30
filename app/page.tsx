@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import { ArrowRight } from "lucide-react";
@@ -30,6 +31,7 @@ type Brand = {
   tag?: string;
   logo?: string;
   quote?: string;
+  href?: string;
 };
 
 function LogoCell({
@@ -63,14 +65,25 @@ function LogoCell({
         )}
       </div>
       {brand.tag ? (
-        <button
-          type="button"
-          onMouseEnter={() => interactive && onHover(brand)}
-          onMouseLeave={() => interactive && onLeave()}
-          className="rounded-full border border-violet/20 bg-violet/8 px-2.5 py-0.5 text-[11px] font-medium text-violet transition-colors hover:bg-violet/14"
-        >
-          {brand.tag}
-        </button>
+        brand.href ? (
+          <Link
+            href={brand.href}
+            onMouseEnter={() => interactive && onHover(brand)}
+            onMouseLeave={() => interactive && onLeave()}
+            className="rounded-full border border-violet/20 bg-violet/8 px-2.5 py-0.5 text-[11px] font-medium text-violet transition-colors hover:bg-violet/14 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            {brand.tag}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onMouseEnter={() => interactive && onHover(brand)}
+            onMouseLeave={() => interactive && onLeave()}
+            className="rounded-full border border-violet/20 bg-violet/8 px-2.5 py-0.5 text-[11px] font-medium text-violet transition-colors hover:bg-violet/14"
+          >
+            {brand.tag}
+          </button>
+        )
       ) : null}
 
       {/* Quote bubble relative to this logo cell */}
@@ -129,16 +142,6 @@ export default function HomePage() {
   const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
 
-  if (!ready) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-        <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          {messages.common.loadingExperience}
-        </div>
-      </main>
-    );
-  }
-
   return (
     <div id="top" className="min-h-screen bg-background text-foreground">
       <WaitlistModal
@@ -146,7 +149,7 @@ export default function HomePage() {
         onClose={() => setWaitlistOpen(false)}
         initialEmail={heroEmail}
       />
-      <Navbar authenticated={authenticated} onLogin={login} />
+      <Navbar authenticated={authenticated} onLogin={login} ready={ready} />
 
       <main>
         {/* ── Hero ── */}

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Table } from "@/components/ui/table";
-import { useCampaigns } from "@/lib/campaign-store";
+import { ShimmerBlock } from "@/components/ui/animated-loading-skeleton";
+import { useCampaigns } from "@/lib/hooks/use-campaigns";
 import { useI18n } from "@/components/providers/i18n-provider";
 
 export function AppCampaignsScreen() {
@@ -47,13 +48,33 @@ export function AppCampaignsScreen() {
             </Table.Row>
           </Table.Header>
           <Table.Body interactive striped>
-            {loading ? (
-              <Table.Row>
-                <Table.Cell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                  Carregando campanhas...
-                </Table.Cell>
-              </Table.Row>
-            ) : null}
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <Table.Row key={`skeleton-${i}`}>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-40 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-20 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-24 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-24 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-12 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-20 rounded" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <ShimmerBlock className="h-4 w-10 rounded" />
+                    </Table.Cell>
+                  </Table.Row>
+                ))
+              : null}
             {campaigns.map((campaign) => (
               <Table.Row key={campaign.id}>
                 <Table.Cell>

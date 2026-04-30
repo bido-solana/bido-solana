@@ -6,6 +6,7 @@ import { UserPill } from "@privy-io/react-auth/ui";
 import {
   Menu,
 } from "lucide-react";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { useI18n } from "@/components/providers/i18n-provider";
 import { addThread, createEmptyThread, loadThreads, type ChatThread } from "@/lib/chat-store";
 import { BidoChatSidebar } from "@/components/app/bido-chat-sidebar";
@@ -73,7 +74,7 @@ function AppNavbar({
               aria-label={messages.common.openChatsDrawer}
             >
               <Menu className="size-4 text-muted-foreground" />
-              <span className="text-lg font-extrabold tracking-tight">BIDO</span>
+              <BrandLogo className="w-[82px]" />
             </button>
           </div>
         </div>

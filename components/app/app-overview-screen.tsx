@@ -4,7 +4,11 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { MetricChart } from "@/components/dashboard/metric-chart";
 import { MiniStatChart } from "@/components/dashboard/mini-stat-chart";
 import { useI18n } from "@/components/providers/i18n-provider";
-import { useCampaigns, useCampaignSummary } from "@/lib/campaign-store";
+import { useCampaigns, useCampaignSummary } from "@/lib/hooks/use-campaigns";
+import {
+  AnimatedLoadingSkeleton,
+  ShimmerBlock,
+} from "@/components/ui/animated-loading-skeleton";
 
 export function AppOverviewScreen() {
   const { formatCurrency } = useI18n();
@@ -33,31 +37,56 @@ export function AppOverviewScreen() {
         </div>
       ) : null}
 
-      {loading && summaryLoading ? (
-        <div className="mb-5 rounded-2xl border border-border bg-card px-5 py-10 text-center text-sm text-muted-foreground">
-          Carregando dashboard...
-        </div>
-      ) : null}
+      {loading || summaryLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+          <div className="mb-5">
+            <MetricChart campaigns={campaigns} />
+          </div>
 
-      <div className="mb-5">
-        <MetricChart campaigns={campaigns} />
-      </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <MiniStatChart
+              label="Custo por Decisão"
+              value={formatCurrency(costPerDecision)}
+              color="#6366f1"
+              items={costPerDecisionItems}
+              formatter={(current) => formatCurrency(current)}
+            />
+            <MiniStatChart
+              label="Win Rate no Leilão"
+              value={`${auctionWinRate.toFixed(1)}%`}
+              color="#10b981"
+              items={winRateItems}
+              formatter={(current) => `${current.toFixed(1)}%`}
+            />
+          </div>
+        </>
+      )}
+    </>
+  );
+}
 
+function DashboardSkeleton() {
+  return (
+    <>
+      <AnimatedLoadingSkeleton
+        className="mb-5"
+        numCards={1}
+        gridClassName="grid grid-cols-1 gap-4"
+        cardClassName="h-72"
+      />
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        <MiniStatChart
-          label="Custo por Decisão"
-          value={formatCurrency(costPerDecision)}
-          color="#6366f1"
-          items={costPerDecisionItems}
-          formatter={(current) => formatCurrency(current)}
-        />
-        <MiniStatChart
-          label="Win Rate no Leilão"
-          value={`${auctionWinRate.toFixed(1)}%`}
-          color="#10b981"
-          items={winRateItems}
-          formatter={(current) => `${current.toFixed(1)}%`}
-        />
+        {[0, 1].map((i) => (
+          <div
+            key={i}
+            className="rounded-2xl border border-border bg-card p-5"
+          >
+            <ShimmerBlock className="mb-3 h-3 w-32 rounded" />
+            <ShimmerBlock className="mb-4 h-8 w-24 rounded" />
+            <ShimmerBlock className="h-24 w-full rounded-md" />
+          </div>
+        ))}
       </div>
     </>
   );

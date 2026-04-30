@@ -6,15 +6,18 @@ import { useEffect, useRef, useState } from "react";
 import { UserPill } from "@privy-io/react-auth/ui";
 import { Menu, X } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { UseCasesMegaMenu } from "@/components/site/use-cases-mega-menu";
 import { cn } from "@/lib/utils";
 
 export function Navbar({
   authenticated,
   onLogin,
+  ready = true,
 }: {
   authenticated: boolean;
   onLogin: () => void;
+  ready?: boolean;
 }) {
   const [menuState, setMenuState] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,7 +31,7 @@ export function Navbar({
     { name: messages.navbar.adsForAgents, href: "/sponsors" },
     { name: messages.navbar.forDevs, href: "/devs" },
     { name: messages.navbar.useCases, href: "#" },
-    { name: messages.navbar.docs, href: "#" },
+    { name: messages.navbar.docs, href: "/docs" },
   ];
 
   useEffect(() => {
@@ -62,11 +65,11 @@ export function Navbar({
           <div className="flex h-16 items-center gap-6 px-6">
             {pathname === "/" ? (
               <a href="#top" aria-label={messages.common.home} className="flex shrink-0 items-center text-foreground">
-                <span className="text-lg font-extrabold tracking-tight">BIDO</span>
+                <BrandLogo className="w-[88px]" priority />
               </a>
             ) : (
               <Link href="/" aria-label={messages.common.home} className="flex shrink-0 items-center text-foreground">
-                <span className="text-lg font-extrabold tracking-tight">BIDO</span>
+                <BrandLogo className="w-[88px]" priority />
               </Link>
             )}
 
@@ -128,7 +131,12 @@ export function Navbar({
                   </button>
                 ))}
               </div>
-              {authenticated ? (
+              {!ready ? (
+                <div
+                  aria-hidden
+                  className="h-9 w-24 animate-pulse rounded-full bg-muted/60"
+                />
+              ) : authenticated ? (
                 <>
                   <UserPill />
                   <Link
@@ -204,7 +212,12 @@ export function Navbar({
                 ))}
               </ul>
               <div className="mt-6 flex flex-col gap-2">
-                {authenticated ? (
+                {!ready ? (
+                  <div
+                    aria-hidden
+                    className="h-10 w-full animate-pulse rounded-full bg-muted/60"
+                  />
+                ) : authenticated ? (
                   <>
                     <div className="rounded-full border border-border bg-surface px-1 py-1">
                       <UserPill expanded />

@@ -1,29 +1,33 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  const resolvedTheme = mounted ? theme : "light";
 
   return (
     <div className="flex gap-0.5 rounded-full border border-border bg-surface p-1 dark:bg-surface-2">
       <SwitchButton
-        selected={theme === "light"}
+        selected={resolvedTheme === "light"}
         label="Light theme"
         onClick={() => setTheme("light")}
       >
         <Sun className="size-4" strokeWidth={2} />
       </SwitchButton>
       <SwitchButton
-        selected={theme === "system"}
+        selected={resolvedTheme === "system"}
         label="System theme"
         onClick={() => setTheme("system")}
       >
         <Monitor className="size-4" strokeWidth={2} />
       </SwitchButton>
       <SwitchButton
-        selected={theme === "dark"}
+        selected={resolvedTheme === "dark"}
         label="Dark theme"
         onClick={() => setTheme("dark")}
       >
@@ -31,6 +35,18 @@ export function ThemeToggle() {
       </SwitchButton>
     </div>
   );
+}
+
+function subscribe() {
+  return () => {};
+}
+
+function getSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
 }
 
 function SwitchButton({

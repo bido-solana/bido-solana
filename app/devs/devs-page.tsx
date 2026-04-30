@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 import { ArrowRight, ArrowUpRight, BookOpen } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
@@ -31,19 +32,9 @@ export function DevsPage() {
   const { messages, replace } = useI18n();
   const devs = messages.devs;
 
-  if (!ready) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
-        <div className="rounded-2xl border border-border bg-surface-2 px-6 py-5 text-sm text-muted-foreground">
-          {messages.common.loadingExperience}
-        </div>
-      </main>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar authenticated={authenticated} onLogin={login} />
+      <Navbar authenticated={authenticated} onLogin={login} ready={ready} />
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
@@ -80,14 +71,14 @@ export function DevsPage() {
             </div>
             
             <div className="mt-10 flex flex-col items-center gap-5">
-              <a
+              <Link
                 href="/docs"
                 className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface-2/60 px-5 py-2.5 text-sm font-medium text-foreground backdrop-blur transition-all hover:border-violet/50 hover:bg-surface-2"
               >
                 <BookOpen className="size-4 text-violet" />
                 {devs.docsCta}
                 <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
-              </a>
+              </Link>
 
 
             <p className="mx-auto max-w-xl text-center text-sm text-muted-foreground">

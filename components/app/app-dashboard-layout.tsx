@@ -7,6 +7,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useRef, useState } from "react";
 import { BarChart3, Menu, Plus, Target } from "lucide-react";
 import { useI18n } from "@/components/providers/i18n-provider";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { cn } from "@/lib/utils";
 
 export function AppDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -118,7 +119,7 @@ export function AppDashboardLayout({ children }: { children: React.ReactNode }) 
                 )}
               >
                 <Menu className="size-4 text-muted-foreground" />
-                <span className="text-lg font-extrabold tracking-tight">BIDO</span>
+                <BrandLogo className="w-[82px]" />
               </button>
             </div>
 

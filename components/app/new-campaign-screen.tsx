@@ -9,7 +9,7 @@ import { TargetingSection } from "@/components/campaign/targeting-section";
 import { BudgetSection } from "@/components/campaign/budget-section";
 import { AdPreview } from "@/components/campaign/ad-preview";
 import { INITIAL_FORM, type CampaignFormData } from "@/lib/campaign-types";
-import { useCampaignActions } from "@/lib/campaign-store";
+import { useCampaignActions } from "@/lib/hooks/use-campaigns";
 
 export function NewCampaignScreen({
   mode = "create",
