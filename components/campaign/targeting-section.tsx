@@ -2,6 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { CampaignFormData } from "@/lib/campaign-types";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface TargetingSectionProps {
   form: CampaignFormData;
@@ -9,28 +10,28 @@ interface TargetingSectionProps {
 }
 
 export function TargetingSection({ form, onChange }: TargetingSectionProps) {
+  const { messages } = useI18n();
+  const t = messages.app.campaignForm.targeting;
   return (
     <section className="rounded-2xl border border-border bg-card p-6">
-      <h2 className="mb-0.5 text-lg font-semibold text-foreground">2. Onde Quer Aparecer?</h2>
-      <p className="mb-6 text-sm text-muted-foreground">Escolha em quais intenções sua campanha pode participar.</p>
+      <h2 className="mb-0.5 text-lg font-semibold text-foreground">{t.title}</h2>
+      <p className="mb-6 text-sm text-muted-foreground">{t.description}</p>
 
       <div>
-        <label className="mb-1.5 block text-sm text-muted-foreground">Categoria de Intenção</label>
+        <label className="mb-1.5 block text-sm text-muted-foreground">{t.categoryLabel}</label>
         <Select value={form.intentCategory} onValueChange={(value) => onChange({ intentCategory: value })}>
           <SelectTrigger className="h-10 w-full rounded-lg">
-            <SelectValue placeholder="Selecionar categoria" />
+            <SelectValue placeholder={t.categoryPlaceholder} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="viagens">Viagens</SelectItem>
-            <SelectItem value="ecommerce">E-commerce</SelectItem>
-            <SelectItem value="saas">SaaS</SelectItem>
-            <SelectItem value="financas">Finanças</SelectItem>
-            <SelectItem value="educacao">Educação</SelectItem>
+            <SelectItem value="viagens">{t.categories.viagens}</SelectItem>
+            <SelectItem value="ecommerce">{t.categories.ecommerce}</SelectItem>
+            <SelectItem value="saas">{t.categories.saas}</SelectItem>
+            <SelectItem value="financas">{t.categories.financas}</SelectItem>
+            <SelectItem value="educacao">{t.categories.educacao}</SelectItem>
           </SelectContent>
         </Select>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Ex: Viagens, E-commerce, SaaS, Finanças, Educação
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t.categoryHelp}</p>
       </div>
     </section>
   );

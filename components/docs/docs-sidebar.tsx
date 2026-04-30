@@ -4,38 +4,47 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Lock } from "lucide-react";
 import { useMemo, useState } from "react";
-import { DOC_SECTIONS, type DocGroup, type DocSection, type DocSectionId } from "@/lib/docs-content";
+import { useI18n } from "@/components/providers/i18n-provider";
+import {
+  DOC_ROUTE_STRUCTURE,
+  getDocsSection,
+  type DocSectionId,
+  type LocalizedDocGroup,
+  type LocalizedDocSection,
+} from "@/lib/docs-content";
 import { cn } from "@/lib/utils";
 
 export function DocsSidebar({ activeSectionId }: { activeSectionId: DocSectionId }) {
+  const { messages } = useI18n();
   const pathname = usePathname();
   const activeSlug = pathname.split("/").filter(Boolean)[2];
-  const section = DOC_SECTIONS.find((item) => item.id === activeSectionId);
+  const section = getDocsSection(messages, activeSectionId);
 
   return (
     <aside className="sticky top-24 hidden h-[calc(100vh-7rem)] w-64 shrink-0 overflow-y-auto pr-4 lg:block">
       <div className="mb-6 flex gap-1 border-b border-border">
-        {DOC_SECTIONS.map((sectionItem) => {
+        {DOC_ROUTE_STRUCTURE.map((routeSection) => {
+          const sectionItem = getDocsSection(messages, routeSection.id);
+          if (!sectionItem) return null;
+
           const firstPage = sectionItem.groups[0]?.pages[0];
           if (!firstPage) return null;
 
-          if (sectionItem.comingSoon) {
-            return <ComingSoonTab key={sectionItem.id} sectionItem={sectionItem} />;
+          if (routeSection.comingSoon) {
+            return <ComingSoonTab key={routeSection.id} sectionItem={sectionItem} />;
           }
 
           return (
             <Link
-              key={sectionItem.id}
-              href={`/docs/${sectionItem.id}/${firstPage.slug}`}
+              key={routeSection.id}
+              href={`/docs/${routeSection.id}/${firstPage.slug}`}
               className={cn(
                 "relative -mb-px px-3 py-2 text-sm font-medium transition-colors",
-                sectionItem.id === activeSectionId
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
+                routeSection.id === activeSectionId ? "text-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
               {sectionItem.label}
-              {sectionItem.id === activeSectionId ? (
+              {routeSection.id === activeSectionId ? (
                 <span className="absolute inset-x-0 -bottom-px h-px bg-violet" />
               ) : null}
             </Link>
@@ -58,7 +67,9 @@ export function DocsSidebar({ activeSectionId }: { activeSectionId: DocSectionId
   );
 }
 
-function ComingSoonTab({ sectionItem }: { sectionItem: DocSection }) {
+function ComingSoonTab({ sectionItem }: { sectionItem: LocalizedDocSection }) {
+  const { messages } = useI18n();
+
   return (
     <div className="group relative">
       <div className="relative -mb-px inline-flex cursor-not-allowed items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground/80">
@@ -66,7 +77,7 @@ function ComingSoonTab({ sectionItem }: { sectionItem: DocSection }) {
         {sectionItem.label}
       </div>
       <div className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-        Em breve
+        {messages.docs.comingSoonBadge}
       </div>
     </div>
   );
@@ -78,11 +89,12 @@ function SidebarGroup({
   isLocked,
   sectionId,
 }: {
-  group: DocGroup;
+  group: LocalizedDocGroup;
   activeSlug?: string;
   isLocked: boolean;
   sectionId: DocSectionId;
 }) {
+  const { messages } = useI18n();
   const containsActive = useMemo(
     () => group.pages.some((page) => page.slug === activeSlug),
     [activeSlug, group.pages],
@@ -116,7 +128,7 @@ function SidebarGroup({
                     <span>{page.title}</span>
                   </div>
                   <div className="pointer-events-none absolute left-full top-1/2 z-20 ml-3 -translate-y-1/2 rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-                    Em breve
+                    {messages.docs.comingSoonBadge}
                   </div>
                 </li>
               );

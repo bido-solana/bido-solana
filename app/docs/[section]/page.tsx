@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { getFirstPage, getSection } from "@/lib/docs-content";
+import { getFirstPageSlug, isDocSectionId } from "@/lib/docs-content";
 
 export default async function DocsSectionPage({
   params,
@@ -7,16 +7,14 @@ export default async function DocsSectionPage({
   params: Promise<{ section: string }>;
 }) {
   const { section } = await params;
-  const sectionMeta = getSection(section);
-
-  if (!sectionMeta) {
+  if (!isDocSectionId(section)) {
     notFound();
   }
 
-  const firstPage = getFirstPage(section);
+  const firstPage = getFirstPageSlug(section);
   if (!firstPage) {
     notFound();
   }
 
-  redirect(`/docs/${section}/${firstPage.slug}`);
+  redirect(`/docs/${section}/${firstPage}`);
 }

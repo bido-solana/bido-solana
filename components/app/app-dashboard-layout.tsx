@@ -64,8 +64,8 @@ export function AppDashboardLayout({ children }: { children: React.ReactNode }) 
   }
 
   const tabs = [
-    { href: "/app", label: "Visão geral", icon: BarChart3 },
-    { href: "/app/campaigns", label: "Campanhas", icon: Target },
+    { href: "/app", label: messages.app.layout.tabs.overview, icon: BarChart3 },
+    { href: "/app/campaigns", label: messages.app.layout.tabs.campaigns, icon: Target },
   ];
 
   const handleSidebarHover = (isHovering: boolean) => {
@@ -166,7 +166,7 @@ export function AppDashboardLayout({ children }: { children: React.ReactNode }) 
                   setMobileSidebarOpen(false);
                 }}
               >
-                Retornar Home
+                {messages.app.layout.backHome}
               </Link>
               <Link
                 href="/app/campaigns/new"
@@ -177,13 +177,13 @@ export function AppDashboardLayout({ children }: { children: React.ReactNode }) 
                 }}
               >
                 <Plus className="size-4" />
-                Nova campanha
+                {messages.app.layout.newCampaign}
               </Link>
             </div>
 
             <div className="min-h-0 flex-1 px-3 pb-4">
               <div className="px-2 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Navegação
+                {messages.app.layout.navigation}
               </div>
               <div className="space-y-1 overflow-y-auto pr-1">
                 {tabs.map((tab) => {

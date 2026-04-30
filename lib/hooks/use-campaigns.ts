@@ -1,9 +1,11 @@
 "use client";
 
 import { usePrivy } from "@privy-io/react-auth";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import {
   type ApiCampaignStatus,
+  type CampaignRecordLabels,
   type CampaignAnalyticsResponse,
   type CampaignRecord,
   type CampaignSummaryResponse,
@@ -28,33 +30,39 @@ function emitRefresh() {
 
 function useStableToken(): GetAccessToken {
   const { getAccessToken } = usePrivy();
-  const ref = useRef(getAccessToken);
-  ref.current = getAccessToken;
-  return useCallback(() => ref.current(), []);
+  return useCallback(() => getAccessToken(), [getAccessToken]);
 }
 
 function useRefreshListener(handler: () => void) {
-  const handlerRef = useRef(handler);
-  handlerRef.current = handler;
   useEffect(() => {
-    const onRefresh = () => handlerRef.current();
-    window.addEventListener(REFRESH_EVENT, onRefresh);
-    return () => window.removeEventListener(REFRESH_EVENT, onRefresh);
-  }, []);
+    const listener = () => handler();
+    window.addEventListener(REFRESH_EVENT, listener);
+    return () => window.removeEventListener(REFRESH_EVENT, listener);
+  }, [handler]);
 }
 
-function toErrorMessage(error: unknown): string {
+function toErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error
     ? error.message
-    : "Erro inesperado ao carregar campanhas.";
+    : fallback;
 }
 
 export function useCampaigns() {
+  const { messages } = useI18n();
   const { ready, authenticated } = usePrivy();
   const getToken = useStableToken();
   const [campaigns, setCampaigns] = useState<CampaignRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const recordLabels = useMemo<CampaignRecordLabels>(
+    () => ({
+      intentLabels: { ...messages.app.campaignData.intentLabels },
+      statusLabels: { ...messages.app.campaignData.statusLabels },
+      objectiveLabels: { ...messages.app.campaignData.objectiveLabels },
+      audiencePending: messages.app.campaignData.audiencePending,
+    }),
+    [messages],
+  );
 
   const reload = useCallback(async () => {
     if (!ready) return;
@@ -73,19 +81,22 @@ export function useCampaigns() {
       const records = await Promise.all(
         items.map(async (item) => {
           const analytics = await campaignsApi.analytics(getToken, item.id);
-          return mapApiCampaignToRecord(item, analytics);
+          return mapApiCampaignToRecord(item, analytics, recordLabels);
         }),
       );
       setCampaigns(records);
     } catch (e) {
-      setError(toErrorMessage(e));
+      setError(toErrorMessage(e, messages.app.campaignData.unexpectedLoadError));
     } finally {
       setLoading(false);
     }
-  }, [ready, authenticated, getToken]);
+  }, [ready, authenticated, getToken, messages, recordLabels]);
 
   useEffect(() => {
-    void reload();
+    const timeoutId = window.setTimeout(() => {
+      void reload();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [reload]);
 
   useRefreshListener(reload);
@@ -94,11 +105,21 @@ export function useCampaigns() {
 }
 
 export function useCampaign(campaignId: string) {
+  const { messages } = useI18n();
   const { ready, authenticated } = usePrivy();
   const getToken = useStableToken();
   const [campaign, setCampaign] = useState<CampaignRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const recordLabels = useMemo<CampaignRecordLabels>(
+    () => ({
+      intentLabels: { ...messages.app.campaignData.intentLabels },
+      statusLabels: { ...messages.app.campaignData.statusLabels },
+      objectiveLabels: { ...messages.app.campaignData.objectiveLabels },
+      audiencePending: messages.app.campaignData.audiencePending,
+    }),
+    [messages],
+  );
 
   const reload = useCallback(async () => {
     if (!ready) return;
@@ -115,17 +136,20 @@ export function useCampaign(campaignId: string) {
     try {
       const item = await campaignsApi.get(getToken, campaignId);
       const analytics = await campaignsApi.analytics(getToken, campaignId);
-      setCampaign(mapApiCampaignToRecord(item, analytics));
+      setCampaign(mapApiCampaignToRecord(item, analytics, recordLabels));
     } catch (e) {
       setCampaign(null);
-      setError(toErrorMessage(e));
+      setError(toErrorMessage(e, messages.app.campaignData.unexpectedLoadError));
     } finally {
       setLoading(false);
     }
-  }, [ready, authenticated, getToken, campaignId]);
+  }, [ready, authenticated, getToken, campaignId, messages, recordLabels]);
 
   useEffect(() => {
-    void reload();
+    const timeoutId = window.setTimeout(() => {
+      void reload();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [reload]);
 
   useRefreshListener(reload);
@@ -134,6 +158,7 @@ export function useCampaign(campaignId: string) {
 }
 
 export function useCampaignSummary() {
+  const { messages } = useI18n();
   const { ready, authenticated } = usePrivy();
   const getToken = useStableToken();
   const [summary, setSummary] = useState<CampaignSummaryResponse | null>(null);
@@ -155,14 +180,17 @@ export function useCampaignSummary() {
     try {
       setSummary(await campaignsApi.summary(getToken));
     } catch (e) {
-      setError(toErrorMessage(e));
+      setError(toErrorMessage(e, messages.app.campaignData.unexpectedLoadError));
     } finally {
       setLoading(false);
     }
-  }, [ready, authenticated, getToken]);
+  }, [ready, authenticated, getToken, messages]);
 
   useEffect(() => {
-    void reload();
+    const timeoutId = window.setTimeout(() => {
+      void reload();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [reload]);
 
   useRefreshListener(reload);
@@ -174,6 +202,7 @@ export function useCampaignAnalytics(
   campaignId: string,
   period: AnalyticsPeriod,
 ) {
+  const { messages } = useI18n();
   const { ready, authenticated } = usePrivy();
   const getToken = useStableToken();
   const [analytics, setAnalytics] = useState<CampaignAnalyticsResponse | null>(
@@ -198,14 +227,17 @@ export function useCampaignAnalytics(
       setAnalytics(await campaignsApi.analytics(getToken, campaignId, period));
     } catch (e) {
       setAnalytics(null);
-      setError(toErrorMessage(e));
+      setError(toErrorMessage(e, messages.app.campaignData.unexpectedLoadError));
     } finally {
       setLoading(false);
     }
-  }, [ready, authenticated, getToken, campaignId, period]);
+  }, [ready, authenticated, getToken, campaignId, period, messages]);
 
   useEffect(() => {
-    void reload();
+    const timeoutId = window.setTimeout(() => {
+      void reload();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [reload]);
 
   useRefreshListener(reload);

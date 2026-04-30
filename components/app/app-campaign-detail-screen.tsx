@@ -58,9 +58,9 @@ function encodeBytesToBase64(value: Uint8Array) {
   return window.btoa(binary);
 }
 
-function compactAddress(value: string | null) {
+function compactAddress(value: string | null, fallback: string) {
   if (!value) {
-    return "Ainda não criado";
+    return fallback;
   }
 
   return `${value.slice(0, 4)}...${value.slice(-4)}`;
@@ -73,7 +73,9 @@ function explorerUrl(address: string) {
 
 export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) {
   const router = useRouter();
-  const { formatCurrency } = useI18n();
+  const { formatCurrency, formatNumber, messages, replace } = useI18n();
+  const t = messages.app.campaignDetail;
+  const balanceFetchFailedLabel = t.onchain.balanceFetchFailed;
   const { ready: walletsReady, wallets } = useWallets();
   const { campaign, loading, error } = useCampaign(campaignId);
   const {
@@ -103,15 +105,15 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
   const activeWallet = wallets[0] ?? null;
   const chartConfig = {
     cdr: {
-      label: "CDR",
+      label: t.performance.chartLegend.cdr,
       color: "#4f5cff",
     },
     loserRate: {
-      label: "Loser Rate",
+      label: t.performance.chartLegend.loserRate,
       color: "#f59e0b",
     },
     winRate: {
-      label: "Win Rate",
+      label: t.performance.chartLegend.winRate,
       color: "#10b981",
     },
   } satisfies ChartConfig;
@@ -120,19 +122,19 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
   const topMetrics = [
     {
       key: "recommendations",
-      label: "CDR (Decision Rate)",
+      label: t.performance.topMetrics.cdr,
       value: `${analytics?.topMetrics.ctd.toFixed(1) ?? "0.0"}%`,
       change: 0,
     },
     {
       key: "decisions",
-      label: "Loser Rate",
+      label: t.performance.topMetrics.loserRate,
       value: `${analytics?.topMetrics.loserRate.toFixed(1) ?? "100.0"}%`,
       change: 3,
     },
     {
       key: "winRate",
-      label: "Win Rate",
+      label: t.performance.topMetrics.winRate,
       value: `${analytics?.topMetrics.winRate.toFixed(1) ?? "0.0"}%`,
       change: 8,
     },
@@ -173,9 +175,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
           return;
         }
 
-        setBalanceError(
-          currentError instanceof Error ? currentError.message : "Falha ao consultar saldo da wallet.",
-        );
+        setBalanceError(currentError instanceof Error ? currentError.message : balanceFetchFailedLabel);
       } finally {
         if (!cancelled) {
           setBalanceLoading(false);
@@ -188,34 +188,40 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
     return () => {
       cancelled = true;
     };
-  }, [activeWallet?.address, walletsReady]);
+  }, [activeWallet?.address, balanceFetchFailedLabel, walletsReady]);
 
   const requiredUsdc = currentCampaign?.monthlyBudget ?? 0;
   const effectiveSolBalance = activeWallet ? solBalance : null;
   const effectiveUsdcBalance = activeWallet ? usdcBalance : null;
   const hasEnoughUsdc = effectiveUsdcBalance !== null && effectiveUsdcBalance >= requiredUsdc;
   const activationDisabledReason = !walletsReady
-    ? "Carregando wallet Solana..."
+    ? t.onchain.loadingWallet
     : !activeWallet
-      ? "Faça login com uma wallet Solana do Privy para ativar."
+      ? t.onchain.loginNeeded
       : balanceLoading
-        ? "Consultando saldo da wallet..."
+        ? t.onchain.checkingBalance
         : balanceError
-          ? "Não foi possível validar o saldo da wallet."
+          ? t.onchain.balanceCheckFailed
           : !hasEnoughUsdc
-            ? `Essa wallet não tem USDC suficiente. Necessário: ${formatCurrency(requiredUsdc, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`
-              : null;
+            ? replace(t.onchain.notEnoughUsdc, {
+                amount: formatCurrency(requiredUsdc, {
+                  currency: "USD",
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }),
+              })
+            : null;
   const onchainLinks = [
     {
-      label: "Campaign PDA",
+      label: t.onchain.addressLabels.campaignPda,
       value: currentCampaign?.onchainCampaignPda ?? null,
     },
     {
-      label: "Vault USDC",
+      label: t.onchain.addressLabels.vault,
       value: currentCampaign?.onchainVaultTokenAccount ?? null,
     },
     {
-      label: "Program ID",
+      label: t.onchain.addressLabels.programId,
       value: currentCampaign?.onchainProgramId ?? null,
     },
   ].filter((item) => item.value);
@@ -256,7 +262,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
         const sponsorWallet = wallets.find((wallet) => wallet.address === prepared.sponsorWallet);
 
         if (!sponsorWallet) {
-          throw new Error("Nenhuma wallet Solana do Privy corresponde ao sponsor autenticado.");
+          throw new Error(t.onchain.sponsorMismatch);
         }
 
         if (prepared.submissionMode === "kora" && prepared.koraSignerAddress) {
@@ -293,7 +299,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
       txHash = await runPreparedTransaction(prepared);
       await confirmCampaignFunding(currentCampaign.id, txHash);
     } catch (currentError) {
-      setFundingError(currentError instanceof Error ? currentError.message : "Falha ao ativar campanha.");
+      setFundingError(currentError instanceof Error ? currentError.message : t.onchain.activationFailed);
     } finally {
       setFundingPending(false);
     }
@@ -306,7 +312,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
   if (!currentCampaign) {
     return (
       <div className="rounded-2xl border border-border bg-card px-5 py-10 text-center text-sm text-muted-foreground">
-        {error ?? "Campaign not found."}
+        {error ?? t.campaignNotFound}
       </div>
     );
   }
@@ -315,21 +321,21 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
     <>
       <ConfirmDialog
         open={pauseConfirmOpen}
-        title={currentCampaign.status === "Pausada" ? "Retomar campanha?" : "Pausar campanha?"}
+        title={currentCampaign.statusCode === "paused" ? t.pauseDialog.resumeTitle : t.pauseDialog.pauseTitle}
         description={
-          currentCampaign.status === "Pausada"
-            ? "A campanha voltará a disputar leilões e aparecer em respostas de IA."
-            : "A campanha deixará de disputar leilões até você ativá-la novamente."
+          currentCampaign.statusCode === "paused"
+            ? t.pauseDialog.resumeDescription
+            : t.pauseDialog.pauseDescription
         }
-        confirmLabel={currentCampaign.status === "Pausada" ? "Retomar" : "Pausar"}
+        confirmLabel={currentCampaign.statusCode === "paused" ? t.menu.resume : t.menu.pause}
         onCancel={() => setPauseConfirmOpen(false)}
         onConfirm={handlePauseConfirm}
       />
       <ConfirmDialog
         open={deleteConfirmOpen}
-        title="Remover campanha?"
-        description="Essa ação remove a campanha da sua lista local e não pode ser desfeita."
-        confirmLabel="Remover"
+        title={t.deleteDialog.title}
+        description={t.deleteDialog.description}
+        confirmLabel={t.deleteDialog.confirm}
         confirmVariant="destructive"
         onCancel={() => setDeleteConfirmOpen(false)}
         onConfirm={handleDeleteConfirm}
@@ -362,7 +368,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
           className="inline-flex items-center gap-2 rounded-2xl border border-border bg-surface px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Todas as campanhas
+          {t.backToCampaigns}
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -370,7 +376,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="lg">
-                  On-chain
+                  {t.onChainMenu}
                   <ChevronDown className="-me-1 ms-1.5 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
@@ -385,7 +391,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
                     >
                       <span className="flex flex-col">
                         <span>{item.label}</span>
-                        <span className="text-xs text-muted-foreground">{compactAddress(item.value)}</span>
+                        <span className="text-xs text-muted-foreground">{compactAddress(item.value, t.onchain.notCreated)}</span>
                       </span>
                       <ExternalLink className="size-4 opacity-60" />
                     </a>
@@ -398,7 +404,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="lg">
-                Actions
+                {t.actionsMenu}
                 <ChevronDown className="-me-1 ms-1.5 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
@@ -406,12 +412,12 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
               <DropdownMenuItem asChild>
                 <Link href={`/app/campaigns/${currentCampaign.id}/edit`}>
                   <Pencil className="size-4 opacity-60" />
-                  Editar
+                  {t.menu.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setPauseConfirmOpen(true)}>
                 <Pause className="size-4 opacity-60" />
-                {currentCampaign.status === "Pausada" ? "Retomar" : "Pausar"}
+                {currentCampaign.statusCode === "paused" ? t.menu.resume : t.menu.pause}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -419,7 +425,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
                 onSelect={() => setDeleteConfirmOpen(true)}
               >
                 <Trash2 className="size-4 opacity-60" />
-                Remover
+                {t.menu.remove}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -428,11 +434,11 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
 
       <section className="rounded-2xl border border-border bg-card p-6">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          <KpiCard label="Campanha" value={currentCampaign.name} />
-          <KpiCard label="Status" value={currentCampaign.status} />
-          <KpiCard label="Budget" value={formatCurrency(currentCampaign.monthlyBudget, { currency: "USD" })} />
+          <KpiCard label={t.kpis.campaign} value={currentCampaign.name} />
+          <KpiCard label={t.kpis.status} value={currentCampaign.status} />
+          <KpiCard label={t.kpis.budget} value={formatCurrency(currentCampaign.monthlyBudget, { currency: "USD" })} />
           <KpiCard
-            label="Lance Máximo"
+            label={t.kpis.maxBid}
             value={formatCurrency(currentCampaign.maxBidPerDecision, {
               currency: "USD",
               minimumFractionDigits: 2,
@@ -446,21 +452,27 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Ativação On-Chain
+              {t.onchain.sectionLabel}
             </p>
             <h2 className="mt-2 text-xl font-semibold text-foreground">
-              {currentCampaign.onchainStatus === "funded_onchain" ? "Campanha ativada" : "Aguardando pagamento"}
+              {currentCampaign.onchainStatus === "funded_onchain" ? t.onchain.active : t.onchain.pending}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {currentCampaign.onchainStatus === "funded_onchain"
-                ? "O budget já foi enviado em USDC para o programa Solana e a campanha está ativa."
-                : `Envie ${formatCurrency(currentCampaign.monthlyBudget, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })} em USDC para ativar a campanha. O gas será pago via Kora.`}
+                ? t.onchain.activeDescription
+                : replace(t.onchain.pendingDescription, {
+                    amount: formatCurrency(currentCampaign.monthlyBudget, {
+                      currency: "USD",
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }),
+                  })}
             </p>
           </div>
 
           {currentCampaign.onchainStatus === "funded_onchain" ? (
             <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600">
-              Funding confirmado
+              {t.onchain.fundingConfirmed}
             </div>
           ) : (
             <div className="flex flex-col items-stretch gap-2">
@@ -471,7 +483,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-violet px-5 py-3 text-sm font-semibold text-violet-foreground transition-colors hover:bg-violet/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {fundingPending ? <Wallet className="size-4 animate-pulse" /> : <Rocket className="size-4" />}
-                {fundingPending ? "Assinando pagamento..." : "Ativar com USDC"}
+                {fundingPending ? t.onchain.signing : t.onchain.activate}
               </button>
               {activationDisabledReason ? (
                 <p className="max-w-sm text-sm text-amber-700">{activationDisabledReason}</p>
@@ -482,28 +494,37 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
 
         {!balanceLoading && activeWallet && currentCampaign.onchainStatus !== "funded_onchain" && !hasEnoughUsdc ? (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-700">
-            Essa wallet do Privy ainda não tem saldo suficiente em USDC para ativar a campanha. Saldo atual:{" "}
-            {formatCurrency(effectiveUsdcBalance ?? 0, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Necessário:{" "}
-            {formatCurrency(requiredUsdc, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}.
+            {replace(t.onchain.insufficientHelp, {
+              current: formatCurrency(effectiveUsdcBalance ?? 0, {
+                currency: "USD",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+              required: formatCurrency(requiredUsdc, {
+                currency: "USD",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+            })}
           </div>
         ) : null}
         {!balanceLoading && activeWallet && currentCampaign.onchainStatus !== "funded_onchain" ? (
           <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-700">
-            Gas patrocinado via Kora. Para ativar esta campanha, o usuário só precisa ter USDC suficiente na wallet do Privy.
+            {t.onchain.gasSponsoredHelp}
           </div>
         ) : null}
 
         <div className="mt-4 grid gap-3 md:grid-cols-5">
           <KpiCard
-            label="Budget On-Chain"
-            value={
-              currentCampaign.onchainStatus === "funded_onchain"
-                ? formatCurrency(currentCampaign.monthlyBudget, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                : formatCurrency(currentCampaign.monthlyBudget, { currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            }
+            label={t.onchain.budgetOnChain}
+            value={formatCurrency(currentCampaign.monthlyBudget, {
+              currency: "USD",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
           />
           <KpiCard
-            label="Custo por Decisão"
+            label={messages.app.dashboard.costPerDecision}
             value={formatCurrency(currentCampaign.maxBidPerDecision, {
               currency: "USD",
               minimumFractionDigits: 2,
@@ -511,10 +532,10 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
             })}
           />
           <KpiCard
-            label="Saldo USDC"
+            label={t.onchain.usdcBalance}
             value={
               balanceLoading
-                ? "Carregando..."
+                ? t.onchain.loading
                 : formatCurrency(effectiveUsdcBalance ?? 0, {
                     currency: "USD",
                     minimumFractionDigits: 2,
@@ -523,24 +544,24 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
             }
           />
           <KpiCard
-            label="Saldo SOL"
+            label={t.onchain.solBalance}
             value={
               balanceLoading
-                ? "Carregando..."
-                : `${(effectiveSolBalance ?? 0).toLocaleString("en-US", {
+                ? t.onchain.loading
+                : `${formatNumber(effectiveSolBalance ?? 0, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 4,
                   })} SOL`
             }
           />
           <KpiCard
-            label="Wallet Sponsor"
+            label={t.onchain.sponsorWallet}
             value={
               activeWallet?.address
-                ? compactAddress(activeWallet.address)
+                ? compactAddress(activeWallet.address, t.onchain.notCreated)
                 : currentCampaign.sponsorWallet
-                  ? compactAddress(currentCampaign.sponsorWallet)
-                  : "Privy wallet"
+                  ? compactAddress(currentCampaign.sponsorWallet, t.onchain.notCreated)
+                  : t.onchain.privyWalletFallback
             }
           />
         </div>
@@ -550,16 +571,16 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
       <section className="mt-5">
         <Card>
           <CardHeader className="min-h-auto border-0 py-6">
-            <CardTitle className="text-lg font-semibold">Campaign Performance</CardTitle>
+            <CardTitle className="text-lg font-semibold">{t.performance.title}</CardTitle>
             <CardToolbar>
               <Select value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as PeriodKey)}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="end">
-                  <SelectItem value="7d">Last 7 days</SelectItem>
-                  <SelectItem value="30d">Last 30 days</SelectItem>
-                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="7d">{t.performance.period7d}</SelectItem>
+                  <SelectItem value="30d">{t.performance.period30d}</SelectItem>
+                  <SelectItem value="90d">{t.performance.period90d}</SelectItem>
                 </SelectContent>
               </Select>
             </CardToolbar>
@@ -567,7 +588,7 @@ export function AppCampaignDetailScreen({ campaignId }: { campaignId: string }) 
           <CardContent className="px-2.5">
             {analyticsLoading ? (
               <div className="flex items-center justify-center py-10">
-                <OrbitalLoader message="Carregando analytics..." />
+                <OrbitalLoader message={t.loadingAnalytics} />
               </div>
             ) : null}
             <div className="px-2.5">

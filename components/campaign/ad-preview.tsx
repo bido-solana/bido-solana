@@ -2,41 +2,39 @@
 
 import { ChevronRight, Globe } from "lucide-react";
 import type { CampaignFormData } from "@/lib/campaign-types";
+import { useI18n } from "@/components/providers/i18n-provider";
 
-function extractDomain(url: string): string {
+function extractDomain(url: string, fallback: string): string {
   try {
     const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
     return parsed.hostname.replace("www.", "");
   } catch {
-    return url || "yourdomain.com";
+    return url || fallback;
   }
-}
-
-function generateAdText(form: CampaignFormData): string {
-  if (form.offerText.trim().length > 10) {
-    return form.offerText.length > 120 ? `${form.offerText.slice(0, 120)}...` : form.offerText;
-  }
-  if (form.brandName.trim()) {
-    return `Discover ${form.brandName} — built for you. Explore what makes us different today.`;
-  }
-  return "Step into comfort and style with The Best Shoe Company — your go-to for everyday shoes that feel as good as they look. Discover the difference today!";
-}
-
-function generateQuestion(form: CampaignFormData): string {
-  if (form.brandName.trim()) {
-    return `What are some options for ${form.brandName.toLowerCase()}?`;
-  }
-  return "What are some comfortable and stylish shoes for everyday wear?";
 }
 
 export function AdPreview({ form }: { form: CampaignFormData }) {
-  const domain = extractDomain(form.destinationUrl);
-  const adText = generateAdText(form);
-  const question = generateQuestion(form);
+  const { messages, replace } = useI18n();
+  const t = messages.app.campaignForm.preview;
+
+  const domain = extractDomain(form.destinationUrl, t.defaultDomain);
+
+  const adText =
+    form.offerText.trim().length > 10
+      ? form.offerText.length > 120
+        ? `${form.offerText.slice(0, 120)}...`
+        : form.offerText
+      : form.brandName.trim()
+        ? replace(t.brandedAdText, { brand: form.brandName })
+        : t.defaultAdText;
+
+  const question = form.brandName.trim()
+    ? replace(t.brandedQuestion, { brand: form.brandName.toLowerCase() })
+    : t.defaultQuestion;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
-      <h3 className="mb-4 text-base font-semibold text-foreground">Preview</h3>
+      <h3 className="mb-4 text-base font-semibold text-foreground">{t.title}</h3>
 
       <div className="mb-3 flex justify-end">
         <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-muted px-4 py-3 text-sm leading-relaxed text-foreground">
@@ -46,7 +44,7 @@ export function AdPreview({ form }: { form: CampaignFormData }) {
 
       <div className="mb-3">
         <button className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/80">
-          AI Response
+          {t.aiResponse}
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-60">
             <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -61,19 +59,19 @@ export function AdPreview({ form }: { form: CampaignFormData }) {
             </div>
             <span className="text-xs font-medium text-foreground">{domain}</span>
           </div>
-          <span className="text-[10px] text-muted-foreground">Sponsored</span>
+          <span className="text-[10px] text-muted-foreground">{t.sponsored}</span>
         </div>
         <p className="mb-3 text-xs leading-relaxed text-foreground">{adText}</p>
         <button className="flex items-center gap-1 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/50">
-          View more
+          {t.viewMore}
           <ChevronRight size={11} />
         </button>
       </div>
 
       <p className="mt-2 text-right text-[11px] text-muted-foreground">
-        Not your icon?{" "}
+        {t.notYourIcon}{" "}
         <button className="underline underline-offset-2 transition-colors hover:text-foreground">
-          Let us know
+          {t.letUsKnow}
         </button>
       </p>
     </div>

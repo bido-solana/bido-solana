@@ -2,6 +2,7 @@
 
 import { HelpCircle } from "lucide-react";
 import type { CampaignFormData } from "@/lib/campaign-types";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface BudgetSectionProps {
   form: CampaignFormData;
@@ -9,17 +10,17 @@ interface BudgetSectionProps {
 }
 
 export function BudgetSection({ form, onChange }: BudgetSectionProps) {
+  const { messages } = useI18n();
+  const t = messages.app.campaignForm.budget;
   return (
     <section className="rounded-2xl border border-border bg-card p-6">
-      <h2 className="mb-0.5 text-lg font-semibold text-foreground">3. Orçamento &amp; Lances</h2>
-      <p className="mb-6 text-sm text-muted-foreground">
-        Defina quanto investir para aparecer nas respostas.
-      </p>
+      <h2 className="mb-0.5 text-lg font-semibold text-foreground">{t.title}</h2>
+      <p className="mb-6 text-sm text-muted-foreground">{t.description}</p>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-            Orçamento Total
+            {t.totalLabel}
             <HelpCircle size={13} className="text-muted-foreground/70" />
           </label>
           <div className="relative">
@@ -36,7 +37,7 @@ export function BudgetSection({ form, onChange }: BudgetSectionProps) {
         </div>
         <div>
           <label className="mb-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-            Lance Máximo por Recomendação
+            {t.bidLabel}
             <HelpCircle size={13} className="text-muted-foreground/70" />
           </label>
           <div className="relative">

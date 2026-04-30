@@ -10,6 +10,7 @@ import { BudgetSection } from "@/components/campaign/budget-section";
 import { AdPreview } from "@/components/campaign/ad-preview";
 import { INITIAL_FORM, type CampaignFormData } from "@/lib/campaign-types";
 import { useCampaignActions } from "@/lib/hooks/use-campaigns";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export function NewCampaignScreen({
   mode = "create",
@@ -21,6 +22,8 @@ export function NewCampaignScreen({
   initialForm?: CampaignFormData;
 }) {
   const router = useRouter();
+  const { messages } = useI18n();
+  const t = messages.app.campaignForm;
   const { createCampaign, editCampaign } = useCampaignActions();
   const [form, setForm] = useState<CampaignFormData>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +47,7 @@ export function NewCampaignScreen({
       const created = await createCampaign(form);
       router.push(`/app/campaigns/${created.id}`);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Failed to save campaign.");
+      setSubmitError(error instanceof Error ? error.message : t.saveFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -56,18 +59,16 @@ export function NewCampaignScreen({
         <Link
           href={mode === "edit" && campaignId ? `/app/campaigns/${campaignId}` : "/app"}
           className="flex size-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-          aria-label="Back to dashboard"
+          aria-label={t.backAria}
         >
           <ArrowLeft size={16} />
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {mode === "edit" ? "Editar Campanha" : "Criar Nova Campanha"}
+            {mode === "edit" ? t.editTitle : t.newTitle}
           </h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            {mode === "edit"
-              ? "Atualize os dados abaixo para ajustar como sua campanha aparece nas respostas de IA."
-              : "Preencha os dados abaixo para aparecer em respostas de IA no momento certo."}
+            {mode === "edit" ? t.editDescription : t.newDescription}
           </p>
         </div>
       </header>
@@ -89,18 +90,14 @@ export function NewCampaignScreen({
               href={mode === "edit" && campaignId ? `/app/campaigns/${campaignId}` : "/app"}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              Cancel
+              {t.cancel}
             </Link>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
               className="rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             >
-              {isSubmitting
-                ? "Salvando..."
-                : mode === "edit"
-                  ? "Salvar Alterações"
-                  : "Lançar Campanha"}
+              {isSubmitting ? t.saving : mode === "edit" ? t.submitEdit : t.submitNew}
             </button>
           </div>
         </div>

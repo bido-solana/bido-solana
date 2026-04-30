@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
-
-const ranges = [
-  "Last 7 days",
-  "Last 14 days",
-  "Last 30 days",
-  "Dec 11, 2025 - Dec 18, 2025",
-];
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export function DateRangePicker() {
+  const { messages } = useI18n();
+  const ranges = useMemo(
+    () => [
+      messages.app.dateRange.last7days,
+      messages.app.dateRange.last14days,
+      messages.app.dateRange.last30days,
+    ],
+    [messages],
+  );
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("Dec 11, 2025 - Dec 18, 2025");
+  const [selected, setSelected] = useState<string>(ranges[2]);
 
   return (
     <div className="relative">

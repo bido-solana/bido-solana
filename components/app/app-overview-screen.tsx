@@ -10,8 +10,12 @@ import {
   ShimmerBlock,
 } from "@/components/ui/animated-loading-skeleton";
 
+function shortCampaignLabel(name: string) {
+  return name.replace(/\s(?:Brasil|Brazil)$/i, "").split(" ").slice(0, 2).join(" ");
+}
+
 export function AppOverviewScreen() {
-  const { formatCurrency } = useI18n();
+  const { formatCurrency, messages } = useI18n();
   const { campaigns, loading, error } = useCampaigns();
   const { summary, loading: summaryLoading, error: summaryError } = useCampaignSummary();
   const costPerDecision = campaigns.length
@@ -19,11 +23,11 @@ export function AppOverviewScreen() {
     : 0;
   const auctionWinRate = summary?.avgWinRate ?? 0;
   const costPerDecisionItems = campaigns.map((campaign) => ({
-    label: campaign.name.replace(" Brasil", "").split(" ").slice(0, 2).join(" "),
+    label: shortCampaignLabel(campaign.name),
     value: campaign.maxBidPerDecision,
   }));
   const winRateItems = campaigns.map((campaign) => ({
-    label: campaign.name.replace(" Brasil", "").split(" ").slice(0, 2).join(" "),
+    label: shortCampaignLabel(campaign.name),
     value: campaign.winRate,
   }));
 
@@ -47,14 +51,14 @@ export function AppOverviewScreen() {
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <MiniStatChart
-              label="Custo por Decisão"
+              label={messages.app.dashboard.costPerDecision}
               value={formatCurrency(costPerDecision)}
               color="#6366f1"
               items={costPerDecisionItems}
               formatter={(current) => formatCurrency(current)}
             />
             <MiniStatChart
-              label="Win Rate no Leilão"
+              label={messages.app.dashboard.auctionWinRate}
               value={`${auctionWinRate.toFixed(1)}%`}
               color="#10b981"
               items={winRateItems}

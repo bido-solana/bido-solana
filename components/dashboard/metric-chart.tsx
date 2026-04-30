@@ -7,11 +7,11 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { useI18n } from "@/components/providers/i18n-provider";
 
 function shortName(name: string) {
-  return name.replace(" Brasil", "").split(" ").slice(0, 2).join(" ");
+  return name.replace(/\s(?:Brasil|Brazil)$/i, "").split(" ").slice(0, 2).join(" ");
 }
 
 export function MetricChart({ campaigns }: { campaigns: CampaignRecord[] }) {
-  const { formatCurrency } = useI18n();
+  const { formatCurrency, messages } = useI18n();
   const [activeTab, setActiveTab] = useState<"ctd" | "spend">("ctd");
 
   const averageCtd = campaigns.length
@@ -41,10 +41,15 @@ export function MetricChart({ campaigns }: { campaigns: CampaignRecord[] }) {
   );
 
   const tabs = [
-    { key: "ctd" as const, label: "CTD", value: `${averageCtd.toFixed(1)}%`, color: "#6366f1" },
+    {
+      key: "ctd" as const,
+      label: messages.app.metricChart.ctd,
+      value: `${averageCtd.toFixed(1)}%`,
+      color: "#6366f1",
+    },
     {
       key: "spend" as const,
-      label: "Spend",
+      label: messages.app.metricChart.spend,
       value: formatCurrency(totalSpend, { currency: "USD" }),
       color: "#10b981",
     },
@@ -53,17 +58,17 @@ export function MetricChart({ campaigns }: { campaigns: CampaignRecord[] }) {
   const active = tabs.find((tab) => tab.key === activeTab) ?? tabs[0];
   const ctdChartConfig: ChartConfig = {
     value: {
-      label: "CTD",
+      label: messages.app.metricChart.ctd,
       color: "#6366f1",
     },
   };
   const spendChartConfig: ChartConfig = {
     spend: {
-      label: "Gasto",
+      label: messages.app.metricChart.spent,
       color: "#10b981",
     },
     remaining: {
-      label: "Disponível",
+      label: messages.app.metricChart.remaining,
       color: "#dfe6dc",
     },
   };

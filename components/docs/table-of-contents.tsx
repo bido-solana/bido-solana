@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/providers/i18n-provider";
 import { cn } from "@/lib/utils";
 
 type Heading = {
@@ -10,6 +11,7 @@ type Heading = {
 };
 
 export function TableOfContents() {
+  const { messages } = useI18n();
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState("");
 
@@ -51,7 +53,7 @@ export function TableOfContents() {
 
   return (
     <aside className="sticky top-24 hidden h-[calc(100vh-7rem)] w-56 shrink-0 overflow-y-auto pl-4 xl:block">
-      <div className="mb-3 text-sm font-semibold text-foreground">On this page</div>
+      <div className="mb-3 text-sm font-semibold text-foreground">{messages.docs.tocLabel}</div>
       <ul className="space-y-1.5 border-l border-border">
         {headings.map((heading) => (
           <li key={heading.id} className={cn(heading.level === 3 && "pl-3")}>

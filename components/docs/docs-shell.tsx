@@ -9,13 +9,7 @@ import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { TableOfContents } from "@/components/docs/table-of-contents";
 import { Navbar } from "@/components/site/navbar";
 import { ThemeToggle } from "@/components/site/theme-toggle";
-import { getAdjacentPages, getSection, type DocSectionId } from "@/lib/docs-content";
-
-type DocsShellPageMeta = {
-  slug: string;
-  title: string;
-  description?: string;
-};
+import { getAdjacentPages, getDocsPage, getDocsSection, type DocSectionId } from "@/lib/docs-content";
 
 function XIcon() {
   return (
@@ -35,17 +29,18 @@ function GitHubIcon() {
 
 export function DocsShell({
   sectionId,
-  page,
+  pageSlug,
   children,
 }: {
   sectionId: DocSectionId;
-  page: DocsShellPageMeta;
+  pageSlug: string;
   children: ReactNode;
 }) {
   const { authenticated, login, ready } = usePrivy();
   const { messages, replace } = useI18n();
-  const section = getSection(sectionId);
-  const { prev, next } = getAdjacentPages(sectionId, page.slug);
+  const section = getDocsSection(messages, sectionId);
+  const currentPage = getDocsPage(messages, sectionId, pageSlug)?.page;
+  const { prev, next } = getAdjacentPages(messages, sectionId, pageSlug);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -56,7 +51,7 @@ export function DocsShell({
           <div className="mx-auto max-w-[1400px] rounded-[28px] border border-violet/14 bg-surface px-5 py-8 shadow-[0_28px_90px_rgba(88,28,135,0.08)] dark:border-violet/20 dark:shadow-[0_28px_90px_rgba(0,0,0,0.42)] sm:px-6 sm:py-10">
             <div className="mb-8 flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet">Documentation</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet">{messages.docs.label}</p>
                 <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{section?.label}</h1>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{section?.description}</p>
               </div>
@@ -69,12 +64,12 @@ export function DocsShell({
               <div className="min-w-0 flex-1">
                 <div className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
                   <Link href="/docs" className="hover:text-foreground">
-                    Docs
+                    {messages.docs.rootLabel}
                   </Link>
                   <ChevronRight className="size-3.5" />
                   <span className="text-foreground">{section?.label}</span>
                   <ChevronRight className="size-3.5" />
-                  <span className="text-foreground">{page.title}</span>
+                  <span className="text-foreground">{currentPage?.title}</span>
                 </div>
 
                 <article className="max-w-3xl">{children}</article>
@@ -87,7 +82,7 @@ export function DocsShell({
                     >
                       <span className="flex items-center gap-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
                         <ArrowLeft className="size-3" />
-                        Previous
+                        {messages.docs.previousLabel}
                       </span>
                       <span className="mt-1 font-semibold text-foreground">{prev.title}</span>
                     </Link>
@@ -101,7 +96,7 @@ export function DocsShell({
                       className="group flex flex-col rounded-2xl border border-border bg-surface-2/40 p-4 text-left transition-colors hover:border-violet/40 sm:items-end sm:text-right"
                     >
                       <span className="flex items-center gap-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        Next
+                        {messages.docs.nextLabel}
                         <ArrowRight className="size-3" />
                       </span>
                       <span className="mt-1 font-semibold text-foreground">{next.title}</span>

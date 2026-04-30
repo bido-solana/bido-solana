@@ -8,16 +8,15 @@ import { useCampaigns } from "@/lib/hooks/use-campaigns";
 import { useI18n } from "@/components/providers/i18n-provider";
 
 export function AppCampaignsScreen() {
-  const { formatCurrency, formatDate } = useI18n();
+  const { formatCurrency, formatDate, messages, replace } = useI18n();
   const { campaigns, loading, error } = useCampaigns();
+  const t = messages.app.campaignsList;
 
   return (
     <>
       <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground text-balance">Campanhas</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Access a specific campaign and monitor status, budget and CTR.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground text-balance">{t.title}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t.subtitle}</p>
       </header>
 
       <section className="rounded-2xl border border-border bg-card p-3 sm:p-5">
@@ -38,13 +37,13 @@ export function AppCampaignsScreen() {
           </Table.Colgroup>
           <Table.Header>
             <Table.Row>
-              <Table.Head>Campanha</Table.Head>
-              <Table.Head>Categoria</Table.Head>
-              <Table.Head>Budget</Table.Head>
-              <Table.Head>Gasto</Table.Head>
-              <Table.Head>CTD</Table.Head>
-              <Table.Head>Atualizada</Table.Head>
-              <Table.Head>Abrir</Table.Head>
+              <Table.Head>{t.headers.campaign}</Table.Head>
+              <Table.Head>{t.headers.category}</Table.Head>
+              <Table.Head>{t.headers.budget}</Table.Head>
+              <Table.Head>{t.headers.spend}</Table.Head>
+              <Table.Head>{t.headers.ctd}</Table.Head>
+              <Table.Head>{t.headers.updated}</Table.Head>
+              <Table.Head>{t.headers.open}</Table.Head>
             </Table.Row>
           </Table.Header>
           <Table.Body interactive striped>
@@ -92,7 +91,7 @@ export function AppCampaignsScreen() {
                     href={`/app/campaigns/${campaign.id}`}
                     className="inline-flex items-center gap-1 font-medium text-foreground transition-opacity hover:opacity-70"
                   >
-                    Ver
+                    {t.open}
                     <ChevronRight className="size-4" />
                   </Link>
                 </Table.Cell>
@@ -101,7 +100,7 @@ export function AppCampaignsScreen() {
             {!loading && campaigns.length === 0 ? (
               <Table.Row>
                 <Table.Cell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                  Nenhuma campanha encontrada.
+                  {t.empty}
                 </Table.Cell>
               </Table.Row>
             ) : null}
@@ -109,7 +108,7 @@ export function AppCampaignsScreen() {
           <Table.Footer>
             <Table.Row>
               <Table.Cell className="font-medium text-foreground" colSpan={2}>
-                {campaigns.length} campanhas cadastradas
+                {replace(t.footerCount, { count: campaigns.length })}
               </Table.Cell>
               <Table.Cell className="font-medium text-foreground">
                 {formatCurrency(campaigns.reduce((sum, campaign) => sum + campaign.monthlyBudget, 0))}

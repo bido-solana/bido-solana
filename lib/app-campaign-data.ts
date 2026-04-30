@@ -101,30 +101,17 @@ export type CampaignRecord = {
   fundedAt: string | null;
 };
 
-const INTENT_LABELS: Record<string, string> = {
-  viagens: "Viagens",
-  ecommerce: "E-commerce",
-  saas: "SaaS",
-  financas: "Finanças",
-  educacao: "Educação",
-};
-
-const STATUS_LABELS: Record<ApiCampaignStatus, string> = {
-  draft: "Rascunho",
-  in_review: "Esperando pagamento",
-  active: "Ativa",
-  paused: "Pausada",
-  archived: "Arquivada",
-};
-
-const OBJECTIVE_LABELS: Record<ApiCampaignObjective, string> = {
-  acquisition: "Aquisição",
-  monetization: "Monetização",
+export type CampaignRecordLabels = {
+  intentLabels: Record<string, string>;
+  statusLabels: Record<ApiCampaignStatus, string>;
+  objectiveLabels: Record<ApiCampaignObjective, string>;
+  audiencePending: string;
 };
 
 export function mapApiCampaignToRecord(
   campaign: ApiCampaign,
   analytics?: CampaignAnalyticsResponse | null,
+  labels?: CampaignRecordLabels,
 ): CampaignRecord {
   const series = analytics?.series ?? [];
   const topMetrics = analytics?.topMetrics;
@@ -133,9 +120,9 @@ export function mapApiCampaignToRecord(
     id: campaign.id,
     name: campaign.name,
     advertiser: campaign.advertiserName,
-    status: STATUS_LABELS[campaign.status] ?? campaign.status,
+    status: labels?.statusLabels[campaign.status] ?? campaign.status,
     statusCode: campaign.status,
-    objective: OBJECTIVE_LABELS[campaign.objective] ?? campaign.objective,
+    objective: labels?.objectiveLabels[campaign.objective] ?? campaign.objective,
     objectiveCode: campaign.objective,
     monthlyBudget: campaign.monthlyBudgetUsd,
     maxBidPerDecision: campaign.maxBidPerDecisionUsd,
@@ -149,8 +136,8 @@ export function mapApiCampaignToRecord(
     impressions: 0,
     clicks: 0,
     conversions: 0,
-    segment: INTENT_LABELS[campaign.intentCategory] ?? campaign.intentCategory,
-    audience: campaign.audienceDescription ?? "Audience description pending.",
+    segment: labels?.intentLabels[campaign.intentCategory] ?? campaign.intentCategory,
+    audience: campaign.audienceDescription ?? labels?.audiencePending ?? "Audience description pending.",
     geo: campaign.geo,
     destinationUrl: campaign.destinationUrl,
     intentCategory: campaign.intentCategory,
